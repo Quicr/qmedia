@@ -22,6 +22,7 @@ extern "C"
                                SourceCallback callback,
                                std::uint16_t transportType,
                                ExternLogCallback log,
+                               uint16_t media_direction,
                                bool echo)
     {
         // Bridge to external logging.
@@ -53,6 +54,7 @@ extern "C"
                        conferenceId,
                        wrapped_callback,
                        (NetTransport::Type) transportType,
+                       (Neo::MediaDirection) media_direction,
                        echo);
         return instance;
     }

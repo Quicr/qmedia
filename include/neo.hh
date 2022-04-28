@@ -32,10 +32,18 @@ public:
         Float32,
         PCMint16
     };
+
     enum struct video_pixel_format
     {
         NV12,
         I420
+    };
+
+    enum struct MediaDirection
+    {
+        publish_only = 1,  // sendonly
+        subscribe_only, // recvonly
+        publish_subscribe, //sendrecv
     };
 
     // Enable testing via various short-circuit
@@ -71,7 +79,8 @@ public:
               uint64_t conferenceID,
               callbackSourceId callback,
               NetTransport::Type transport_type,
-              bool echo);
+              MediaDirection media_dir,
+              bool echo = false);
 
     std::atomic<bool> mutedAudioEmptyFrames = false;        // keyframe request
                                                             // in progress.
@@ -160,6 +169,8 @@ private:
     unsigned int audio_sample_rate;
     unsigned int audio_channels;
     audio_sample_type type;
+
+    MediaDirection media_dir;
 
     /// Video parameters and helpers
     void encodeVideoFrame(const char *buffer,

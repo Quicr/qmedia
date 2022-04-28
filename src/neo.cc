@@ -29,6 +29,7 @@ void Neo::init(const std::string &remote_address,
                uint64_t conferenceID,
                callbackSourceId callback,
                NetTransport::Type xport_type,
+               MediaDirection dir,
                bool echo)
 {
     myClientID = clientID;
@@ -44,6 +45,7 @@ void Neo::init(const std::string &remote_address,
     video_decode_pixel_format = video_decode_pixel_format_;
     newSources = callback;
     transport_type = xport_type;
+    media_dir = dir;
 
     if (transport_type == NetTransport::Type::PICO_QUIC)
     {
@@ -121,18 +123,22 @@ void Neo::init(const std::string &remote_address,
         return;
     }
 
-    video_encoder = std::make_unique<H264Encoder>(
-        video_max_width,
-        video_max_height,
-        video_max_frame_rate,
-        video_max_bitrate,
-        (uint32_t) video_encode_pixel_format,
-        log);
+    log->info << "MediaDirection:" << (int) media_dir << std::flush;
 
-    if (!video_encoder)
-    {
-        log->error << " video encoder init failed" << std::flush;
-        return;
+    if (media_dir == MediaDirection::publish_only) {
+        video_encoder = std::make_unique<H264Encoder>(
+            video_max_width,
+            video_max_height,
+            video_max_frame_rate,
+            video_max_bitrate,
+            (uint32_t) video_encode_pixel_format,
+            log);
+
+        if (!video_encoder)
+        {
+            log->error << " video encoder init failed" << std::flush;
+            return;
+        }
     }
 }
 
@@ -253,6 +259,9 @@ void Neo::sendVideoFrame(const char *buffer,
                          uint64_t timestamp,
                          uint64_t sourceID)
 {
+    if (video_encoder == nullptr) {
+        log->debug << "Video Encoder, unavailable" << std::flush;
+    }
     // TODO:implement clone()
     // TODO: remove assert
     int sendRaw = 0;        // 1 will send Raw YUV video instead of AV1

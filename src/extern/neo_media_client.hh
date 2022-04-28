@@ -42,6 +42,7 @@ extern "C"
                                       SourceCallback callback,
                                       std::uint16_t transportType,
                                       ExternLogCallback log,
+                                      std::uint16_t media_direction,
                                       bool echo = false);
 
     EXPORT void CALL sendAudio(NeoMediaInstance instance,
