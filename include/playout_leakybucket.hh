@@ -5,6 +5,7 @@
 #include <chrono>
 #include <deque>
 
+#include "logger.hh"
 namespace neo_media
 {
 class LeakyBucket
@@ -20,7 +21,8 @@ public:
     const bool smooth_drain_speed = false;        // smoothing of drain speed
                                                   // disabled
 
-    LeakyBucket() :
+    LeakyBucket(const LoggerPointer &parent_logger) :
+        logger(parent_logger),
         max_bucket_size(max_bucket_active),
         target_fill_level(target_fill_active),
         initial_fill(true),
@@ -52,6 +54,7 @@ public:
     double getSrcRatio();
 
 private:
+    LoggerPointer logger;
     bool initial_fill;
     unsigned int max_bucket_size;
     unsigned int target_fill_level;

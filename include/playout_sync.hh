@@ -10,6 +10,7 @@ namespace neo_media
 class Sync
 {
 public:
+    LoggerPointer  logger;
     std::chrono::steady_clock::time_point local_audio_time_popped;
     uint64_t source_audio_time_popped = 0;
     uint64_t audio_seq_popped = 0;

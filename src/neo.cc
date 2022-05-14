@@ -211,6 +211,7 @@ void Neo::doWork()
 
             if (jitter_instance != nullptr)
             {
+                log->debug << "DoWork: Adding to jitter:" << *packet << std::flush;
                 new_stream = jitter_instance->push(std::move(packet));
                 // jitter assembles packets to frames, decodes, conceals
                 // and makes frames available to client
@@ -483,11 +484,12 @@ std::uint32_t Neo::getVideoFrame(uint64_t clientID,
     if (jitter_instance == nullptr) return 0;
 
     Packet::IdrRequestData idr_data = {clientID, 0, 0};
+    log->info << "getVideoFrame: Asking Jitter for video" << std::flush;
     recv_length = jitter_instance->popVideo(
         sourceID, width, height, format, timestamp, buffer, idr_data);
     if (idr_data.source_timestamp > 0)
     {
-        log->debug << "jitter asked for keyFrame, sending IDR\n" << std::flush;
+        log->debug << "jitter asked for keyFrame, sending IDR" << std::flush;
         PacketPointer idr = std::make_unique<Packet>();
         idr->packetType = Packet::Type::IdrRequest;
         idr->transportSequenceNumber = 0;

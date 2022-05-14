@@ -26,6 +26,7 @@ class Jitter : public JitterInterface
 {
 public:
     using JitterPtr = std::shared_ptr<Jitter>;
+    LoggerPointer logger;
 
     Jitter(unsigned int audio_sample_rate,
            unsigned int audio_channels,
@@ -90,6 +91,7 @@ public:
         unsigned int audio_sample_rate;
         std::shared_ptr<OpusAssembler> opus_assembler;
         Silence silence;
+        LoggerPointer  logger;
 
     private:
         unsigned int getMsPerPacketInQueue();
@@ -128,7 +130,6 @@ private:
     bool shutdown = false;
     const unsigned int maxStreams = 4;
     Packet::MediaType decode_audio_as;
-    LoggerPointer logger;
     Metrics::MeasurementPtr measurement = nullptr;
     void recordMetrics(MetaQueue &q,
                        MetaQueue::media_type type,

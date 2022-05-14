@@ -213,10 +213,23 @@ media_consumer_frame_ready(void *media_ctx,
                            uint64_t frame_id,
                            const uint8_t *data,
                            size_t data_length,
-                           quicrq_reassembly_frame_mode_enum frame_mode)
+                           quicrq_reassembly_object_mode_enum frame_mode)
 {
+
     int ret = 0;
     auto *cons_ctx = (ConsumerContext *) media_ctx;
+    auto logger = cons_ctx->transport->logger;
+
+    logger->info << "[frame_ready: id:" << frame_id
+                 << ", frame_mode:" << (int) frame_mode
+                 << ",data_len:" << data_length << "]" << std::flush;
+
+    if (frame_mode == quicrq_reassembly_object_mode_enum::quicrq_reassembly_object_peek)
+    {
+        logger->debug << "[frame_ready:quicrq_reassembly_frame_peek, ignoring" << std::flush;
+        return 0;
+    }
+
     struct sockaddr_storage stored_addr;
     struct sockaddr *peer_addr = nullptr;
     quicrq_get_peer_address(cons_ctx->cnx_ctx, &stored_addr);
@@ -263,7 +276,7 @@ int media_consumer_learn_final_frame_id(void *media_ctx,
 {
     int ret = 0;
     auto *cons_ctx = (ConsumerContext *) media_ctx;
-    ret = quicrq_reassembly_learn_final_frame_id(&cons_ctx->reassembly_ctx,
+    ret = quicrq_reassembly_learn_final_object_id(&cons_ctx->reassembly_ctx,
                                                  final_frame_id);
     return ret;
 }
@@ -274,6 +287,7 @@ int media_consumer_fn(quicrq_media_consumer_enum action,
                       const uint8_t *data,
                       uint64_t frame_id,
                       uint64_t offset,
+                      uint64_t queue_delay,
                       int is_last_segment,
                       size_t data_length)
 {
@@ -296,7 +310,7 @@ int media_consumer_fn(quicrq_media_consumer_enum action,
                 ret = quicrq_consumer_finished;
             }
             break;
-        case quicrq_media_final_frame_id:
+        case quicrq_media_final_object_id:
             media_consumer_learn_final_frame_id(media_ctx, frame_id);
             if (ret == 0 && cons_ctx->reassembly_ctx.is_finished)
             {
@@ -501,7 +515,7 @@ NetTransportQUICR::NetTransportQUICR(TransportManager *t,
     picoquic_set_key_log_file_from_env(quic);
 
     picoquic_set_mtu_max(quic, config.mtu_max);
-    config.qlog_dir = ".";
+    config.qlog_dir = "/Users/snandaku/Downloads/logs";
     if (config.qlog_dir != NULL)
     {
         picoquic_set_qlog(quic, config.qlog_dir);

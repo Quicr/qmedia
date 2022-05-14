@@ -44,6 +44,8 @@ unsigned int PopFrequencyCounter::getAveragePopDelay()
 
 unsigned int PopFrequencyCounter::getFps()
 {
+    logger->debug << "[PopFreqCounter: interval_sum:" << interval_sum
+        << ", pop_time size:" << pop_time.size() << std::flush;
     // moving average
     unsigned int delay_average = getAveragePopDelay();
     if (!delay_average) return 0;

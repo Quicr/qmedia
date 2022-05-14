@@ -10,9 +10,13 @@ void LeakyBucket::emptyBucket(std::chrono::steady_clock::time_point now)
 
 unsigned int LeakyBucket::getRecommendedFillLevel(unsigned int audio_jitter_ms)
 {
+
     unsigned int new_target = target_fill_level;
     unsigned int min_jitter_ms = audio_jitter_ms;
 
+    logger->debug <<"LB:getRecommendedFillLevel, new_target:" << target_fill_active
+        << "min_jitter_ms:" << min_jitter_ms
+        << "max_bucket_size:" << max_bucket_size << std::flush;
     if (min_jitter_ms > new_target) new_target = min_jitter_ms;
 
     // add calculations about RTT here - and adjust for the need for n x
@@ -77,6 +81,11 @@ void LeakyBucket::tick(std::chrono::steady_clock::time_point now,
                        unsigned int ms_per_audio,
                        unsigned int fps)
 {
+    logger->debug << "[LB- depth:" << queue_depth
+        << ",audio_jitter_ms:" << audio_jitter_ms
+        << ",ms_per_audio" << ms_per_audio
+        << "]" << std::flush;
+
     if (initialFill(queue_depth, audio_jitter_ms)) return;
 
     queue_depth_tracker.emplace_back(queue_depth, now);

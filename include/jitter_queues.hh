@@ -3,6 +3,7 @@
 #include <list>
 #include "packet.hh"
 #include "metrics.hh"
+#include "logger.hh"
 
 namespace neo_media
 {
@@ -44,6 +45,7 @@ public:
 class MetaQueue
 {
 public:
+    LoggerPointer logger;
     std::mutex qMutex;
     bool empty();
     unsigned int size();

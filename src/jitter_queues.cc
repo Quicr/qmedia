@@ -47,6 +47,8 @@ void MetaQueue::drainToMax()
 {
     while (Q.size() > max_size)
     {
+        logger->debug << "[MQ: draiToMax, QSize:" << Q.size()
+                     << ", max_size" << max_size  << std::flush;
         // drain if too full
         // TODO - track metric here
         PacketPointer p = std::move(Q.front()->packet);
@@ -209,10 +211,14 @@ void MetaQueue::queueVideoFrame(PacketPointer raw_packet,
                                 std::chrono::steady_clock::time_point now)
 {
     uint64_t new_seq = raw_packet->encodedSequenceNum;
+    logger->debug << "[MQ: " << raw_packet->mediaType
+                 << ",last_seq_popped:" << last_seq_popped
+                 << ",new_seq:" << new_seq << "]" << std::flush;
 
     // check if it is not too old play - throw it
     if (last_seq_popped != UINT64_MAX && new_seq <= last_seq_popped)
     {
+        logger->debug << "[MQ: new_seq <= last_seq_popped, discarding ]" << std::flush;
         raw_packet.reset();
         ++metrics.discarded;
         return;
@@ -225,6 +231,7 @@ void MetaQueue::queueVideoFrame(PacketPointer raw_packet,
     // normal case is to push new packets at the back of the queue
     if (Q.empty() || (new_seq > Q.back()->packet->encodedSequenceNum))
     {
+        logger->debug << "[MQ: Adding frame to queue" << std::flush;
         Q.push_back(frame);
         ++metrics.total;
         drainToMax();
@@ -238,6 +245,7 @@ void MetaQueue::queueVideoFrame(PacketPointer raw_packet,
         if (new_seq < curr_seq)
         {
             // new frame is older than the one in queue
+            logger->debug << "[MQ:Video: out of order frame inserted" << std::flush;
             Q.insert(it, frame);
             ++metrics.total;
             drainToMax();
@@ -247,6 +255,7 @@ void MetaQueue::queueVideoFrame(PacketPointer raw_packet,
         {
             if (new_seq == curr_seq)
             {
+                logger->debug << "[MQ:Video: out of order frame and retransmitted" << std::flush;
                 // retransmitted frame has been previously retransmitted - skip
                 ++metrics.discarded_repeats;
                 return;
@@ -258,6 +267,7 @@ void MetaQueue::queueVideoFrame(PacketPointer raw_packet,
 unsigned int MetaQueue::lostInQueue(unsigned int &numPlc,
                                     uint64_t last_seq_popped)
 {
+    logger->debug << "[MQ:lostInQ: last_seq_popped:" << last_seq_popped << "]" << std::flush;
     unsigned int lost = 0;
     numPlc = 0;
     uint64_t prev_seq = last_seq_popped;

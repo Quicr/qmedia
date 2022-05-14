@@ -33,6 +33,7 @@ H264Encoder::H264Encoder(unsigned int video_max_width,
     encParamBase.iPicWidth = video_max_width;
     encParamBase.iTargetBitrate = video_max_bitrate;
     encParamBase.iRCMode = RC_OFF_MODE;
+    encParamBase.iUsageType = CAMERA_VIDEO_REAL_TIME;
     encoder->Initialize(&encParamBase);
 
 }
@@ -142,7 +143,7 @@ int H264Encoder::encode(const char *input_buffer,
     if(genKeyFrame) {
         logger->info << "Encode: Force IDR" << std::flush;
         auto ret = encoder->ForceIntraFrame(true);
-        logger->error << "Encode: IDR Frame Generation Error " << ret << std::flush;
+        logger->error << "Encode: IDR Frame Generation Result " << ret << std::flush;
     }
 
     memset(&outputFrame, 0, sizeof (SFrameBSInfo));

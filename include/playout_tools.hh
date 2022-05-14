@@ -4,6 +4,7 @@
 #include <mutex>
 #include <deque>
 
+#include "logger.hh"
 #include "jitter_queues.hh"
 
 namespace neo_media
@@ -15,6 +16,7 @@ public:
     void updatePopFrequency(std::chrono::steady_clock::time_point now);
     unsigned int getAveragePopDelay();
     unsigned int getFps();
+    LoggerPointer logger;
 
 private:
     std::mutex pMutex;
@@ -40,6 +42,7 @@ public:
     unsigned int getJitterMs();
     unsigned int standard_deviation(unsigned int num_std);
 
+    LoggerPointer logger;
     std::deque<unsigned int> jitter_values;
     uint64_t prev_jitter_seq;
     std::chrono::steady_clock::time_point prev_jitter_time;

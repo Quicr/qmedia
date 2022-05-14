@@ -30,10 +30,51 @@ std::ostream &operator<<(std::ostream &os, const Packet::Type &pktType)
         case Packet::Type::StreamContentNack:
             os << "StreamContentNack";
             break;
+        case Packet::Type::IdrRequest:
+            os << "IDRRequest";
+            break;
         case Packet::Type::Unknown:
             os << "Unknown";
     }
     return os;
+}
+
+std::ostream &operator<<(std::ostream &os, const Packet::MediaType &mediaType)
+{
+    switch (mediaType)
+    {
+        case Packet::MediaType::Opus:
+            os << "Opus";
+            break;
+        case Packet::MediaType::AV1:
+            os << "AV1";
+            break;
+        case Packet::MediaType::Bad:
+            os << "Bad";
+            break;
+        case Packet::MediaType::Raw:
+            os << "Raw";
+            break;
+        case Packet::MediaType::L16:
+            os << "L16";
+            break;
+        case Packet::MediaType::F32:
+            os << "F32";
+            break;
+    }
+    return os;
+}
+
+
+std::ostream & operator<<(std::ostream& os, const Packet& packet)
+{
+    os << "[Type:" << packet.packetType <<", MediaType:"
+        << packet.mediaType << ", EncSeqNo:" << packet.encodedSequenceNum
+        << ",Fragment# " << packet.chunkFragmentNum << ",FragCount:"
+        << packet.fragmentCount << ",EncSize:" << packet.encoded_data.size()
+        << ",DataSize:" << packet.data.size() <<"]";
+
+    return  os;
 }
 
 // Protobuf Specific Packet encoder

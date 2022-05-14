@@ -73,8 +73,10 @@ int H264Decoder::decode(const char *input_buffer,
 
     if (dsErrorFree != ret)
     {
-        std::cerr << " H264 decode frame failed" << std::endl;
-        // handle IDR request
+        // use logger interface
+        std::cerr << " H264 decode frame failed" << dst_info.iBufferStatus << std::endl;
+        // handle IDR reques
+        return 0;
     }
 
     if (dst_info.iBufferStatus == 1)

@@ -32,11 +32,18 @@ Sync::sync_action Sync::getVideoAction(unsigned int audio_pop_delay,
 
     for (const auto &frame : mq.Q)
     {
+        logger->debug << "[sync:videoAction num_pop:" << num_pop
+                     << ", video_seq_popped:" << video_seq_popped << "]" << std::flush;
+        if(frame->packet != nullptr) {
+            logger->debug << "\t " << *frame->packet << std::flush;
+        }
+
         // first frame - pop_discard to IDR - or pop if IDR is next
         if (video_seq_popped == UINT64_MAX)
         {
             if (frame->packet->videoFrameType != Packet::VideoFrameType::Idr)
             {
+                logger->debug << "[sync:videoAction:" << "first frame is not idr, discard]" << std::flush;
                 action = pop_discard;
                 ++num_pop;
             }
@@ -57,6 +64,7 @@ Sync::sync_action Sync::getVideoAction(unsigned int audio_pop_delay,
         else if (frame->packet->encodedSequenceNum ==
                  (video_seq_popped + num_pop + 1))
         {
+            logger->debug << "[sync:videoAction: processing frames in order ]" << std::flush;
             // video only action
             if (source_audio_time_popped == 0)
             {
@@ -69,6 +77,8 @@ Sync::sync_action Sync::getVideoAction(unsigned int audio_pop_delay,
                 // pop (another) older frame
                 action = sync_action::pop;
                 ++num_pop;
+                logger->debug << "[sync:videoAction popping older frame: num_pop:"
+                             << num_pop << "]" << std::flush;
             }
             // audio stopped popping or stopped receiving requires independent
             // video action - 400ms is trigger
@@ -78,24 +88,32 @@ Sync::sync_action Sync::getVideoAction(unsigned int audio_pop_delay,
             {
                 action = sync_action::pop_video_only;
                 ++num_pop;
+                logger->debug << "[sync:videoAction audio pop stopped > 400ms" << std::flush;
                 break;        // only single pop for video only
             }
-            else
-                return action;        // hard exit - we have frames in order.
-                                      // return either previous pop or default
-                                      // hold
+            else {
+                logger->debug << "[sync:videoAction, returning default action:" << action << std::flush;
+                return action;  // hard exit - we have frames in order.
+                                // return either previous pop or default
+                                 // hold
+            }
+
+
         }
         // video out of order - discard until IDR is found - or return IDR
         else
         {
-            if (action == pop)        // if we find out-of-order deeper in the
-                                      // queue - wait
+            logger->debug << "[sync:videoAction processing out of order frame: action"
+                << (int) action << "]" << std::flush;
+            if (action == pop)   {
                 break;
+            }     // if we find out-of-order deeper in the queue - wait
 
             // TODO:  take into consideration type of frame to support
             // discardable (acceptable) loss
             if (frame->packet->videoFrameType != Packet::VideoFrameType::Idr)
             {
+                logger->debug << "[sync:videoAction discarding, not IDR" << std::flush;
                 action = pop_discard;
                 ++num_pop;
             }
@@ -105,10 +123,14 @@ Sync::sync_action Sync::getVideoAction(unsigned int audio_pop_delay,
                 {
                     action = pop;
                     ++num_pop;
+                    logger->debug << "[sync:videoAction setting action to pop, num_pop"
+                                 << num_pop << "]" << std::flush;
                 }
                 break;
             }
         }
     }
+
+    logger->info << "[sync:videoAction final action:" << action << "]" << std::flush;
     return action;
 }

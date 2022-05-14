@@ -121,4 +121,6 @@ public:
 };
 
 std::ostream &operator<<(std::ostream &os, const Packet::Type &pktType);
+std::ostream &operator<<(std::ostream &os, const Packet::MediaType &mediaType);
+std::ostream& operator<<(std::ostream& os, const Packet& packet);
 }        // namespace neo_media

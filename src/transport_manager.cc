@@ -439,7 +439,8 @@ bool TransportManager::recvDataFromNet(
         return false;
     }
 
-    logger->info << "[R]: Type:" << packet->packetType << "," << packet->encodedSequenceNum << std::flush;
+    logger->info << "[R]: "<< *packet <<  std::flush;
+
 #if 0
     // decrypt if its client transportManager
     if (Type::Client == type() && !packet->data.empty())  {
@@ -529,7 +530,7 @@ bool TransportManager::getDataToSendToNet(
     memcpy(
         &peer_info->addr, &(packet->peer_info.addr), packet->peer_info.addrLen);
     *addrLen = peer_info->addrLen;
-    logger->info << "[S]: Type:" << packet->packetType << ", " << packet->encodedSequenceNum << std::flush;
+    logger->info << "[S]:" << *packet << std::flush;
 
     data_out = std::move(packet->encoded_data);
 
