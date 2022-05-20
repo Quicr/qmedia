@@ -131,7 +131,7 @@ void quicrq_app_check_source_time(TransportContext *cb_ctx,
     else if (time_check_arg->delta_t > 5000)
     {
         // is this a good choice?
-        time_check_arg->delta_t = 5000;
+        time_check_arg->delta_t = 1000;
     }
 }
 
@@ -158,6 +158,7 @@ static int media_frame_publisher_fn(quicrq_media_source_action_enum action,
     int ret = 0;
     auto pub_ctx = (PublisherContext *) media_ctx;
     auto logger = pub_ctx->transport->logger;
+
     if (action == quicrq_media_source_get_data)
     {
         *is_media_finished = 0;
@@ -166,6 +167,7 @@ static int media_frame_publisher_fn(quicrq_media_source_action_enum action,
 
         if (pub_ctx->transportManager->shutDown)
         {
+            *is_still_active = 0;
             // todo handle gracefully.
             // todo handle media finished setting
             throw std::runtime_error("can't publish data, transport manager is "
@@ -189,13 +191,15 @@ static int media_frame_publisher_fn(quicrq_media_source_action_enum action,
                 send_packet.data, &send_packet.peer, &send_packet.peer.addrLen);
             if (got)
             {
+                logger->info << "Copied data to the quicr transport:" << *data_length << std::flush;
                 std::copy(
                     send_packet.data.begin(), send_packet.data.end(), data);
                 *is_last_segment = 1;
+                *is_still_active = 1;
+            } else {
+                *is_still_active = 0;
             }
-        }
-        else
-        {
+        } else {
             *is_last_segment = 1;
         }
         ret = 0;
@@ -238,11 +242,8 @@ media_consumer_frame_ready(void *media_ctx,
     // TODO: support IPV6
     memcpy(&peer_info.addr, (sockaddr *) &stored_addr, sizeof(sockaddr_in));
     peer_info.addrLen = sizeof(struct sockaddr_storage);
-    // auto cnx_id = picoquic_get_client_cnxid(cons_ctx->cnx_ctx->cnx);
     bytes cnx_id_bytes = {};
-    // print_sock_info("dg_callbk:", &peer_info.addr);
     peer_info.transport_connection_id = std::move(cnx_id_bytes);
-
     auto recv_data = std::string(data, data + data_length);
     cons_ctx->transportManager->recvDataFromNet(recv_data,
                                                 std::move(peer_info));
@@ -493,11 +494,13 @@ void NetTransportQUICR::subscribe(Packet::MediaType media_type,
 NetTransportQUICR::NetTransportQUICR(TransportManager *t,
                                      std::string sfuName,
                                      uint16_t sfuPort,
-                                     const LoggerPointer& logger_in) :
+                                     const LoggerPointer& logger_in,
+                                     const Metrics::MetricsPtr metrics_in) :
     transportManager(t),
     quicConnectionReady(false),
     quicr_ctx(quicrq_create_empty()),
-    logger(logger_in)
+    logger(logger_in),
+    metrics(metrics_in)
 {
     logger->info << "Quicr Client Transport" << std::flush;
     picoquic_config_init(&config);

@@ -119,7 +119,7 @@ TEST_CASE("lineProtocol-multi-fields")
 }
 
 // not really a unit test - but nice to test against influx instance
-#if 0        // don't want this for jenkins .. enable for local testing
+// don't want this for jenkins .. enable for local testing
 TEST_CASE("salt-n-peppa-push-it")
 {
     std::clog << "test start" << std::endl;
@@ -140,8 +140,7 @@ TEST_CASE("salt-n-peppa-push-it")
         clock += std::chrono::milliseconds(10);
     }
     std::clog << "push start" << std::endl;
-    metrics.push();
-    std::this_thread::sleep_for(std::chrono::seconds(5));
+    ///metrics.pusher();
+    std::this_thread::sleep_for(std::chrono::seconds(100));
     std::clog << "push stop" << std::endl;
 }
-#endif

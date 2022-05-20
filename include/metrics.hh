@@ -75,7 +75,10 @@ public:
         bool sent = false;
     };
 
-    void pusher();
+    void emitMetrics();
+    void sendMetrics(const std::vector<std::string>& collected_metrics);
+
+    void push_loop();
     void push();        // push(std::string & name) - specific push
     typedef std::shared_ptr<Measurement> MeasurementPtr;
     typedef std::pair<std::string, int> tag;

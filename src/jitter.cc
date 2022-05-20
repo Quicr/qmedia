@@ -47,8 +47,10 @@ void Jitter::recordMetrics(MetaQueue &q,
     if (metrics != nullptr)
     {
         if (measurement == nullptr)
+        {
             measurement = metrics->createMeasurement(
-                "Jitter", {{"clientID", clientID}, {"sourceID", sourceID}});
+                "jitter", {{"clientID", clientID}, {"sourceID", sourceID}});
+        }
 
         if (measurement != nullptr)
         {
@@ -424,8 +426,6 @@ int Jitter::popVideo(uint64_t sourceID,
                 packet = video.pop(now);
                 if (packet != nullptr)
                 {
-                    logger->info << "[V:" << *packet << "]"
-                                  << std::flush;
                     decodeVideoPacket(std::move(packet),
                                       sourceID,
                                       width,
@@ -444,9 +444,11 @@ int Jitter::popVideo(uint64_t sourceID,
             for (unsigned int pops = 0; pops < num_pop; pops++)
             {
                 packet = video.pop(now);
-                logger->info << "jitter:discard " << *packet << std::flush;
-                sourceRecordTime = packet->sourceRecordTime;
-                packet.reset(nullptr);
+                if (packet) {
+                    logger->info << "jitter:discard " << *packet << std::flush;
+                    sourceRecordTime = packet->sourceRecordTime;
+                    packet.reset(nullptr);
+                }
             }
             idr_data_out.source_id = sourceID;
             idr_data_out.source_timestamp = sourceRecordTime;

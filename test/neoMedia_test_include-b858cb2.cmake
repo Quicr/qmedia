@@ -1,0 +1,5 @@
+if(EXISTS "/Users/snandaku/repos/work/new-media/qmedia/test/neoMedia_test_tests-b858cb2.cmake")
+  include("/Users/snandaku/repos/work/new-media/qmedia/test/neoMedia_test_tests-b858cb2.cmake")
+else()
+  add_test(neoMedia_test_NOT_BUILT-b858cb2 neoMedia_test_NOT_BUILT-b858cb2)
+endif()

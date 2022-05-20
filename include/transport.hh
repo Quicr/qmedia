@@ -20,6 +20,8 @@ public:
     {
         std::string data;
         PeerConnectionInfo peer;
+        uint64_t transport_data_id;
+        size_t transport_data_length;
         bool empty() { return data.empty(); }
     };
 

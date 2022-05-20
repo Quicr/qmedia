@@ -427,6 +427,8 @@ transport.hh
 include/transport.hh
 logger.hh
 include/logger.hh
+metrics.hh
+include/metrics.hh
 picoquic.h
 include/picoquic.h
 picoquic_internal.h

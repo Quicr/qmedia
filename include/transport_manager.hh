@@ -42,7 +42,8 @@ public:
                                         TransportManager *transportManager,
                                         const std::string &sfuName_in,
                                         int sfuPort_in,
-                                        const LoggerPointer &logger)
+                                        const LoggerPointer &logger,
+                                        const Metrics::MetricsPtr metrics)
     {
         NetTransport *transport = nullptr;
         std::string name = "";
@@ -64,7 +65,7 @@ public:
             case NetTransport::QUICR:
                 name = "TransportQuicr";
                 transport = new NetTransportQUICR(
-                    transportManager, sfuName_in, sfuPort_in, logger);
+                    transportManager, sfuName_in, sfuPort_in, logger, metrics);
                 break;
             case NetTransport::PICO_QUIC:
                 name = "TransportQUIC";
@@ -113,6 +114,9 @@ public:
 
     bool recvDataFromNet(std::string &data_in,
                          NetTransport::PeerConnectionInfo info);
+
+    bool recvDataFromNet(NetTransport::Data& data_in);
+
     bool getDataToSendToNet(std::string &data_out,
                             NetTransport::PeerConnectionInfo *info,
                             socklen_t *addrLen);
@@ -128,9 +132,6 @@ public:
         return std::weak_ptr<NetTransport>(netTransport);
     }
 
-protected:
-    friend NetTransport;
-    std::shared_ptr<NetTransport> netTransport;
     // Metrics reported by transport manager
     enum struct MeasurementType
     {
@@ -141,9 +142,12 @@ protected:
         QDepth_Tx,
         QDepth_Rx,
     };
-
     std::map<MeasurementType, Metrics::MeasurementPtr> measurements;
     void recordMetric(MeasurementType, const PacketPointer &packetPointer);
+
+protected:
+    friend NetTransport;
+    std::shared_ptr<NetTransport> netTransport;
     Metrics::MetricsPtr metrics;
 
     // rtx handle (used by clientTxMgr today)

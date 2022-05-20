@@ -28,7 +28,7 @@ TransportManager::TransportManager(NetTransport::Type type,
                                    Metrics::MetricsPtr metricsPtr,
                                    const LoggerPointer &parent_logger) :
     netTransport(
-        make_transport(type, this, sfuName_in, sfuPort_in, parent_logger)),
+        make_transport(type, this, sfuName_in, sfuPort_in, parent_logger, metricsPtr)),
     metrics(metricsPtr)
 {
     logger = std::make_shared<Logger>("TransportManager", parent_logger);
@@ -324,6 +324,7 @@ void TransportManager::recordMetric(MeasurementType mtype,
         return;
     }
 
+    logger->info << "recordMetric in TxManager: " << (int) mtype << std::flush;
     // common tags
     auto tags = Metrics::Measurement::Tags{
         {"clientID", packetPointer->clientID},
@@ -354,6 +355,7 @@ void TransportManager::recordMetric(MeasurementType mtype,
         {
             if (!measurements.count(mtype))
             {
+                logger->info << "Creating Measurement: " << measurement_name.at(mtype) << std::flush;
                 measurements[mtype] = metrics->createMeasurement(
                     measurement_name.at(mtype), {});
             }
@@ -374,12 +376,6 @@ void TransportManager::recordMetric(MeasurementType mtype,
         now, Metrics::Measurement::Field{"depth", sendQ.size()});
     measurements[MeasurementType::QDepth_Rx]->set(
         now, Metrics::Measurement::Field{"depth", recvQ.size()});
-
-    if (num_metrics_accumulated > NUM_METRICS_TO_ACCUMULATE)
-    {
-        metrics->push();
-        num_metrics_accumulated = 0;
-    }
 }
 
 bool TransportManager::netEncode(Packet *packet, std::string &data_out)
@@ -414,6 +410,11 @@ bool TransportManager::netDecode(const std::string &data_in, Packet *packet_out)
     packet_out->authTag.resize(1);
     packet_out->authTag[0] = 0xF;
     return true;
+}
+
+bool TransportManager::recvDataFromNet(NetTransport::Data &data_in)
+{
+    return recvDataFromNet(data_in.data, data_in.peer);
 }
 
 bool TransportManager::recvDataFromNet(
@@ -460,6 +461,7 @@ bool TransportManager::recvDataFromNet(
     {
         recordMetric(MeasurementType::PacketRate_Rx, packet);
     }
+
     // let rtx_manager know about the packet
     if (rtx_mgr && packet->packetType == Packet::Type::StreamContentAck)
     {

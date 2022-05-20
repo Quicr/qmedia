@@ -4,15 +4,16 @@
 #include <chrono>
 #include <iostream>
 #include <string>
+#include <vector>
 
 #include "metrics.hh"
 
 using namespace neo_media;
 
-const std::string MetricsConfig::URL = "";
-const std::string MetricsConfig::ORG = "";
-const std::string MetricsConfig::BUCKET = "";
-const std::string MetricsConfig::AUTH_TOKEN = "";
+const std::string MetricsConfig::URL = "http://influxdb-quicr-uswest-2.ctgpoc.com:8086";
+const std::string MetricsConfig::ORG = "CTO";
+const std::string MetricsConfig::BUCKET = "Media10x";
+const std::string MetricsConfig::AUTH_TOKEN = "N2nuOJYyurlqYGkE-yBAPYar-iqn1G0RgQ1o3D98eZPv-k3qeNRBL51269nElFvnLtvCNmyMsVwx1p4TtKcvNA==";
 
 Metrics::Metrics(const std::string &influx_url,
                  const std::string &org,
@@ -63,7 +64,7 @@ Metrics::Metrics(const std::string &influx_url,
     curl_easy_setopt(handle, CURLOPT_TCP_KEEPALIVE, 1L);
 
     // Start the service thread
-    metrics_thread = std::thread(&Metrics::pusher, this);
+    metrics_thread = std::thread(&Metrics::push_loop, this);
     metrics_thread.detach();
 }
 
@@ -79,59 +80,118 @@ Metrics::~Metrics()
     curl_global_cleanup();
 }
 
-void Metrics::pusher()
-{
-    while (!shutdown)
-    {
-        std::unique_lock<std::mutex> lk(push_mutex);
-        cv.wait(lk, [&]() -> bool { return (shutdown || push_signals); });
 
-        lk.unlock();
-        if (!push_signals)
+void Metrics::sendMetrics(const std::vector<std::string>& collected_metrics)
+{
+    CURLcode res;                      // curl response
+    std::string influx_payload;        // accumulated statements
+    long response_code;                // http response code
+
+    std::cerr << "SendMetrics: count:" << collected_metrics.size() << std::endl;
+
+    // Iterate over the vector of strings
+    for (auto &statement : collected_metrics)
+    {
+        // Concatenate this string to the payload
+        influx_payload += statement;
+    }
+
+    std::clog << "Points\n" << influx_payload << std::endl;
+    // set the payload, which is a collection of influx statements
+    curl_easy_setopt(
+        handle, CURLOPT_POSTFIELDSIZE_LARGE, influx_payload.size());
+    curl_easy_setopt(handle, CURLOPT_POSTFIELDS, influx_payload.c_str());
+
+    // perform the request
+    res = curl_easy_perform(handle);
+
+    if (res != CURLE_OK) {
+        std::clog << "Unable to post metrics:"
+                  << curl_easy_strerror(res) << std::endl;
+        return;
+    }
+
+    curl_easy_getinfo(handle, CURLINFO_RESPONSE_CODE, &response_code);
+
+    std::cerr << "Metrics write result: " << response_code << std::endl;
+
+    if (response_code < 200 || response_code >= 300)
+    {
+        std::cerr << "Http error posting to influx: " << response_code
+                  << std::endl;
+        return;
+    }
+}
+
+void Metrics::emitMetrics()
+{
+    auto collected_metrics = std::vector<std::string>{};
+
+    // Lock the mutex while collecting metrics data
+    std::unique_lock<std::mutex> lock(metrics_mutex);
+
+    for (const auto &mes : measurements)
+    {
+        auto mlines = mes.second->lineProtocol();
+        std::cerr << "Measurement: " << mes.first << ", has "
+                  << mlines.size() <<  " points " << std::endl;
+        if(mes.first == "Jitter" || mes.first == "jitter") {
+            // todo fix this
+            continue ;
+        }
+
+        if (mlines.empty())
         {
             continue;
         }
 
-        push_signals = false;
-        bool print_error = true;
-        for (const auto &mes : measurements)
+        for (const auto &point : mlines)
         {
-            auto mlines = mes.second->lineProtocol();
-            if (mlines.empty())
-            {
-                continue;
-            }
-            std::string points;
-            for (const auto &point : mlines) points += point;
-
-            // std::clog << points << std::endl;
-
-            curl_easy_setopt(
-                handle, CURLOPT_POSTFIELDSIZE_LARGE, points.length());
-            curl_easy_setopt(handle, CURLOPT_POSTFIELDS, points.c_str());
-            CURLcode res = curl_easy_perform(handle);
-            if (res != CURLE_OK && print_error)
-            {
-                std::clog << "Unable to post metrics:"
-                          << curl_easy_strerror(res) << std::endl;
-                print_error = false;
-                continue;
-            }
-            long response_code;
-            curl_easy_getinfo(handle, CURLINFO_RESPONSE_CODE, &response_code);
-
-            if (response_code < 200 || response_code >= 300)
-            {
-                std::cerr << "Http error posting to influx: " << response_code
-                          << std::endl;
-                shutdown = true;
-                break;
-            }
-            else
-                mes.second->sent = true;
+            collected_metrics.emplace_back(point);
         }
+        std::cerr << "Collected metrics count: " << collected_metrics.size() << std::endl;
     }
-    std::cerr << "Metrics Thread is down" << std::endl;
+
+    // release the lock
+    lock.unlock();
+
+    sendMetrics(collected_metrics);
+}
+
+void Metrics::push_loop()
+{
+    constexpr auto period = 1000;
+    std::chrono::time_point<std::chrono::steady_clock> current_time, next_time;
+
+    // Lock the mutex before starting work
+    std::unique_lock<std::mutex> lock(metrics_mutex);
+
+    // Initialize then metrics emitter time
+    next_time = std::chrono::steady_clock::now() +
+                std::chrono::milliseconds(period);
+
+    while (!shutdown)
+    {
+        // Wait until alerted
+        cv.wait_until(lock, next_time, [&]() { return shutdown; });
+
+        // Were we told to terminate?
+        if (shutdown) {
+            std::clog << "Metrics is shutdown " << std::flush;
+            break;
+        }
+
+        // unlock the mutex
+        lock.unlock();
+
+        emitMetrics();
+
+        // Re-lock the mutex
+        lock.lock();
+
+        next_time = std::chrono::steady_clock::now() +
+                    std::chrono::milliseconds(period);
+    }
 }
 
 void Metrics::push()
