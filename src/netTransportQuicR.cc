@@ -123,16 +123,19 @@ void quicrq_app_wake_up_sources(TransportContext *cb_ctx, uint64_t current_time)
 void quicrq_app_check_source_time(TransportContext *cb_ctx,
                                   packet_loop_time_check_arg_t *time_check_arg)
 {
+    // metric: log when this function gets called as influx point
     if (cb_ctx->transportManager->hasDataToSendToNet())
     {
         time_check_arg->delta_t = 0;
+        // log delta
         return;
     }
     else if (time_check_arg->delta_t > 5000)
     {
         // is this a good choice?
-        time_check_arg->delta_t = 1000;
+        time_check_arg->delta_t = 5000;
     }
+    // log here delta
 }
 
 // invoked under following flows
@@ -159,6 +162,7 @@ static int media_frame_publisher_fn(quicrq_media_source_action_enum action,
     auto pub_ctx = (PublisherContext *) media_ctx;
     auto logger = pub_ctx->transport->logger;
 
+    // log the delta for processing
     if (action == quicrq_media_source_get_data)
     {
         *is_media_finished = 0;
@@ -208,6 +212,7 @@ static int media_frame_publisher_fn(quicrq_media_source_action_enum action,
     {
         /* todo close the context */
     }
+    // delta end
     return ret;
 }
 
@@ -234,6 +239,7 @@ media_consumer_frame_ready(void *media_ctx,
         return 0;
     }
 
+    // log the delta until the frame is handed over to the app
     struct sockaddr_storage stored_addr;
     struct sockaddr *peer_addr = nullptr;
     quicrq_get_peer_address(cons_ctx->cnx_ctx, &stored_addr);

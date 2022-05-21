@@ -62,8 +62,9 @@ void AudioEncoder::encodeFrame(const char *buffer,
         buffers.addBuffer(empty_buff, length, timestamp);
         delete[] empty_buff;
     }
-    else
+    else {
         buffers.addBuffer((const uint8_t *) buffer, length, timestamp);
+    }
 
     if (frameReady != nullptr)
     {
@@ -80,7 +81,6 @@ void AudioEncoder::encoderWerk()
         cv.wait(ulock, [&]() -> bool { return shutdown || immediate_encode; });
         if (immediate_encode)
         {
-            // std::lock_guard<std::mutex> lock(buffer_lock);
             pop_and_encode();
             immediate_encode = false;
         }

@@ -13,7 +13,7 @@ using namespace neo_media;
 const std::string MetricsConfig::URL = "http://influxdb-quicr-uswest-2.ctgpoc.com:8086";
 const std::string MetricsConfig::ORG = "CTO";
 const std::string MetricsConfig::BUCKET = "Media10x";
-const std::string MetricsConfig::AUTH_TOKEN = "N2nuOJYyurlqYGkE-yBAPYar-iqn1G0RgQ1o3D98eZPv-k3qeNRBL51269nElFvnLtvCNmyMsVwx1p4TtKcvNA==";
+const std::string MetricsConfig::AUTH_TOKEN = "oEOOKjRhBu-ebmNVMzKgm9bFPMcOfkZf1tIoJ3JweiunhBY6S-LQL3w8xuO5SRKo5UNr-6dnZSWr2CMZ_OzC0w==";
 
 Metrics::Metrics(const std::string &influx_url,
                  const std::string &org,
@@ -96,7 +96,7 @@ void Metrics::sendMetrics(const std::vector<std::string>& collected_metrics)
         influx_payload += statement;
     }
 
-    std::clog << "Points\n" << influx_payload << std::endl;
+    // std::clog << "Points\n" << influx_payload << std::endl;
     // set the payload, which is a collection of influx statements
     curl_easy_setopt(
         handle, CURLOPT_POSTFIELDSIZE_LARGE, influx_payload.size());
@@ -149,7 +149,6 @@ void Metrics::emitMetrics()
         {
             collected_metrics.emplace_back(point);
         }
-        std::cerr << "Collected metrics count: " << collected_metrics.size() << std::endl;
     }
 
     // release the lock

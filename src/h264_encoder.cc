@@ -153,10 +153,10 @@ int H264Encoder::encode(const char *input_buffer,
         switch (outputFrame.eFrameType)
         {
             case videoFrameTypeSkip:
-                logger->debug << "Encode: videoFrameTypeSkip" << std::flush;
+                logger->info << "Encode: videoFrameTypeSkip" << std::flush;
                 return 0;
             case videoFrameTypeInvalid:
-                logger->debug << "Encode failed: " << ret << std::flush;
+                logger->info << "Encode failed: " << ret << std::flush;
                 return -1;
         }
     }

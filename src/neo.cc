@@ -301,6 +301,10 @@ void Neo::sendVideoFrame(const char *buffer,
         return;
     }
 
+    // adding for delay from encode to reassembly in jitter
+    auto now = std::chrono::system_clock::now();
+    auto now_ms = std::chrono::time_point_cast<std::chrono::milliseconds>(now).time_since_epoch().count();
+    packet->encodedTime = now_ms;
     // create object for managing packetization
     auto packets = std::make_shared<SimplePacketize>(std::move(packet),
                                                      1200 /* MTU */);
@@ -409,9 +413,6 @@ void Neo::encodeVideoFrame(const char *buffer,
     {
         case Packet::MediaType::AV1:
         {
-            // TODO : add logic to determine to send keyframe or not
-            // TODO : encoder api needs to return frame type and its
-            // relationships
             bool keyFrame = reqKeyFrame;
             packet->videoFrameType = (Packet::VideoFrameType)
                                          video_encoder->encode(buffer,
@@ -527,7 +528,6 @@ void Neo::audioEncoderCallback(PacketPointer packet)
     }
 
     // send it over the network
-
     transport->send(std::move(packet));
 }
 

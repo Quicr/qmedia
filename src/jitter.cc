@@ -39,6 +39,64 @@ Jitter::~Jitter()
     video.mq.flushPackets();
 }
 
+
+void Jitter::recordMetric(MeasurementType measurement_type,
+                          const PacketPointer& packet,
+                  MetaQueue& q,
+                  MetaQueue::media_type media_type,
+                  uint64_t clientID,
+                  uint64_t sourceID)
+{
+    // TODO: metrics sould batch instead
+    static const auto measurement_name = std::map<MeasurementType, std::string>{
+        {MeasurementType::FrameReadyForDecode, "FrameReadyForDecode"},
+    };
+
+    if (!metrics)
+    {
+        return;
+    }
+
+    // common tags
+    auto tags = Metrics::Measurement::Tags{
+        {"clientID", clientID},
+        {"sourceID", sourceID}};
+
+    // fields common for most of the metrics
+    auto fields = Metrics::Measurement::Fields{{"count", 1}};
+
+    auto now = std::chrono::system_clock::now();
+    auto now_ms = std::chrono::time_point_cast<std::chrono::milliseconds>(now).time_since_epoch().count();
+
+    switch (measurement_type)
+    {
+        case MeasurementType::FrameReadyForDecode:
+        {
+            if (!measurements.count(measurement_type))
+            {
+                logger->info << "Creating Measurement: "
+                             << measurement_name.at(measurement_type)
+                             << std::flush;
+                measurements[measurement_type] = metrics->createMeasurement(
+                    measurement_name.at(measurement_type), {});
+            }
+            auto diff = now_ms - packet->encodedTime;
+            logger->info << "FrameReadyForDecode: frame:"
+                         << packet->encodedSequenceNum
+                         << ", duation=" << diff << std::flush;
+            tags.push_back({"media_type", (uint64_t) media_type});
+            fields.push_back({"duration", diff});
+            auto entry = Metrics::Measurement::TimeEntry{std::move(tags),
+                                                         std::move(fields)};
+            measurements[measurement_type]->set_time_entry(now, std::move(entry));
+        }
+        break;
+        default:
+            break;
+    }
+}
+
+
 void Jitter::recordMetrics(MetaQueue &q,
                            MetaQueue::media_type type,
                            uint64_t clientID,
@@ -59,6 +117,8 @@ void Jitter::recordMetrics(MetaQueue &q,
         }
     }
 }
+
+
 
 bool Jitter::push(PacketPointer raw_packet)
 {
@@ -102,12 +162,14 @@ bool Jitter::push(PacketPointer packet,
                 if (raw != nullptr)
                 {
                     logger->info << "[jitter-v: assembled full frame:" << *raw << std::flush;
+                    recordMetric(MeasurementType::FrameReadyForDecode,
+                                 video.mq,
+                                 MetaQueue::media_type::video,
+                                 clientID,
+                                 sourceID);
                     // we got assembled frame, add it to jitter queue
                     video.push(std::move(raw), sync.video_seq_popped, now);
-                    recordMetrics(video.mq,
-                                  MetaQueue::media_type::video,
-                                  clientID,
-                                  sourceID);
+
                 }
             }
             break;

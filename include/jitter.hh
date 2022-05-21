@@ -130,6 +130,19 @@ private:
     bool shutdown = false;
     const unsigned int maxStreams = 4;
     Packet::MediaType decode_audio_as;
+    // Metrics reported by transport manager
+    enum struct MeasurementType
+    {
+        FrameReadyForDecode, // report when a full frame was assembled
+    };
+    std::map<MeasurementType, Metrics::MeasurementPtr> measurements;
+    void recordMetric(MeasurementType,
+                      const PacketPointer& packet,
+                      MetaQueue& q,
+                      MetaQueue::media_type type,
+                      uint64_t clientID,
+                      uint64_t sourceID);
+
     Metrics::MeasurementPtr measurement = nullptr;
     void recordMetrics(MetaQueue &q,
                        MetaQueue::media_type type,

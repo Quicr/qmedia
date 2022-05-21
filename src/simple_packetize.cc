@@ -31,6 +31,7 @@ PacketPointer SimplePacketize::GetPacket(std::uint16_t packet_index)
     packet->transportSequenceNumber = original_packet->transportSequenceNumber;
     packet->mediaType = original_packet->mediaType;
     packet->videoFrameType = original_packet->videoFrameType;
+    packet->encodedTime = original_packet->encodedTime;
 
     if (GetPacketCount() == 1)
     {
