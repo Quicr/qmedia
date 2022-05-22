@@ -29,6 +29,7 @@ message MediaDataHeader {
   uint64 packetCount = 11;          // total packets
   uint64 frameSize = 12;            // total bytes in frame
   uint32 priorityLevel = 13;
+  fixed64 frameReadyToEncodeTime = 15;
   enum VideoFrameType {
     None = 0;
     Idr = 1;

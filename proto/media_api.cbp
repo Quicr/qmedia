@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6"/>
+	<Project>
+		<Option title="media_api"/>
+		<Option makefile_is_custom="1"/>
+		<Option compiler="gcc"/>
+		<Option virtualFolders="CMake Files\;CMake Files\proto\;CMake Files\vcpkg_installed\;CMake Files\vcpkg_installed\x64-osx\;CMake Files\vcpkg_installed\x64-osx\share\;CMake Files\vcpkg_installed\x64-osx\share\protobuf\;CMake Files\vcpkg_installed\x64-osx\share\curl\;CMake Files\vcpkg_installed\x64-osx\share\zlib\;CMake Files\vcpkg_installed\x64-osx\share\opus\;CMake Files\vcpkg_installed\x64-osx\share\openssl\;CMake Files\vcpkg_installed\x64-osx\share\portaudio\;CMake Files\vcpkg_installed\x64-osx\share\doctest\;CMake Files\..\;CMake Files\..\media\;CMake Files\..\media\vcpkg\;CMake Files\..\media\vcpkg\scripts\;CMake Files\..\media\vcpkg\scripts\buildsystems\;CMake Files\cmake\;CMake Files\_deps\;CMake Files\_deps\sframe-src\;CMake Files\third_party\;CMake Files\third_party\tmp\;CMake Files\src\;CMake Files\src\extern\;CMake Files\cmd\;CMake Files\test\;"/>
+		<Build>
+			<Target title="all">
+				<Option working_dir="/Users/snandaku/repos/work/new-media/qmedia/proto"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -f &quot;/Users/snandaku/repos/work/new-media/qmedia/proto/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/usr/bin/make -f &quot;/Users/snandaku/repos/work/new-media/qmedia/proto/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -f &quot;/Users/snandaku/repos/work/new-media/qmedia/proto/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -f &quot;/Users/snandaku/repos/work/new-media/qmedia/proto/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="media_api">
+				<Option output="/Users/snandaku/repos/work/new-media/qmedia/proto/libmedia_api.a" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/snandaku/repos/work/new-media/qmedia/proto"/>
+				<Option object_output="./"/>
+				<Option type="2"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/Users/snandaku/repos/work/new-media/qmedia/include"/>
+					<Add directory="/Users/snandaku/repos/work/new-media/qmedia/src/extern"/>
+					<Add directory="/Users/snandaku/repos/work/new-media/qmedia/lib"/>
+					<Add directory="/Users/snandaku/repos/work/new-media/qmedia/tests"/>
+					<Add directory="/Users/snandaku/repos/work/new-media/quicrq/include"/>
+					<Add directory="/Users/snandaku/repos/work/new-media/quicrq/lib"/>
+					<Add directory="/Users/snandaku/repos/work/new-media/picoquic/picoquic"/>
+					<Add directory="/Users/snandaku/repos/work/new-media/picoquic/loglib"/>
+					<Add directory="/Users/snandaku/repos/work/new-media/picotls/include"/>
+					<Add directory="/Users/snandaku/repos/work/new-media/qmedia/vcpkg_installed/x64-osx/include"/>
+					<Add directory="/Users/snandaku/repos/work/new-media/qmedia/proto"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -f &quot;/Users/snandaku/repos/work/new-media/qmedia/proto/Makefile&quot;  VERBOSE=1 media_api"/>
+					<CompileFile command="/usr/bin/make -f &quot;/Users/snandaku/repos/work/new-media/qmedia/proto/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -f &quot;/Users/snandaku/repos/work/new-media/qmedia/proto/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -f &quot;/Users/snandaku/repos/work/new-media/qmedia/proto/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="media_api/fast">
+				<Option output="/Users/snandaku/repos/work/new-media/qmedia/proto/libmedia_api.a" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/snandaku/repos/work/new-media/qmedia/proto"/>
+				<Option object_output="./"/>
+				<Option type="2"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/Users/snandaku/repos/work/new-media/qmedia/include"/>
+					<Add directory="/Users/snandaku/repos/work/new-media/qmedia/src/extern"/>
+					<Add directory="/Users/snandaku/repos/work/new-media/qmedia/lib"/>
+					<Add directory="/Users/snandaku/repos/work/new-media/qmedia/tests"/>
+					<Add directory="/Users/snandaku/repos/work/new-media/quicrq/include"/>
+					<Add directory="/Users/snandaku/repos/work/new-media/quicrq/lib"/>
+					<Add directory="/Users/snandaku/repos/work/new-media/picoquic/picoquic"/>
+					<Add directory="/Users/snandaku/repos/work/new-media/picoquic/loglib"/>
+					<Add directory="/Users/snandaku/repos/work/new-media/picotls/include"/>
+					<Add directory="/Users/snandaku/repos/work/new-media/qmedia/vcpkg_installed/x64-osx/include"/>
+					<Add directory="/Users/snandaku/repos/work/new-media/qmedia/proto"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -f &quot;/Users/snandaku/repos/work/new-media/qmedia/proto/Makefile&quot;  VERBOSE=1 media_api/fast"/>
+					<CompileFile command="/usr/bin/make -f &quot;/Users/snandaku/repos/work/new-media/qmedia/proto/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -f &quot;/Users/snandaku/repos/work/new-media/qmedia/proto/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -f &quot;/Users/snandaku/repos/work/new-media/qmedia/proto/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Unit filename="/Users/snandaku/repos/work/new-media/qmedia/proto/media.pb.cc">
+			<Option target="media_api"/>
+		</Unit>
+		<Unit filename="/Users/snandaku/repos/work/new-media/qmedia/proto/media.pb.h">
+			<Option target="media_api"/>
+		</Unit>
+		<Unit filename="/Users/snandaku/repos/work/new-media/qmedia/proto/media.pb.h.rule">
+			<Option target="media_api"/>
+		</Unit>
+		<Unit filename="/Users/snandaku/repos/work/new-media/qmedia/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\"/>
+		</Unit>
+		<Unit filename="/Users/snandaku/repos/work/new-media/qmedia/vcpkg.json">
+			<Option virtualFolder="CMake Files\"/>
+		</Unit>
+		<Unit filename="/Users/snandaku/repos/work/new-media/qmedia/proto/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\proto\"/>
+		</Unit>
+		<Unit filename="/Users/snandaku/repos/work/new-media/qmedia/vcpkg_installed/.cmakestamp">
+			<Option virtualFolder="CMake Files\vcpkg_installed\"/>
+		</Unit>
+		<Unit filename="/Users/snandaku/repos/work/new-media/qmedia/vcpkg_installed/x64-osx/share/protobuf/vcpkg-cmake-wrapper.cmake">
+			<Option virtualFolder="CMake Files\vcpkg_installed\x64-osx\share\protobuf\"/>
+		</Unit>
+		<Unit filename="/Users/snandaku/repos/work/new-media/qmedia/vcpkg_installed/x64-osx/share/curl/CURLConfig.cmake">
+			<Option virtualFolder="CMake Files\vcpkg_installed\x64-osx\share\curl\"/>
+		</Unit>
+		<Unit filename="/Users/snandaku/repos/work/new-media/qmedia/vcpkg_installed/x64-osx/share/curl/CURLConfigVersion.cmake">
+			<Option virtualFolder="CMake Files\vcpkg_installed\x64-osx\share\curl\"/>
+		</Unit>
+		<Unit filename="/Users/snandaku/repos/work/new-media/qmedia/vcpkg_installed/x64-osx/share/curl/CURLTargets-debug.cmake">
+			<Option virtualFolder="CMake Files\vcpkg_installed\x64-osx\share\curl\"/>
+		</Unit>
+		<Unit filename="/Users/snandaku/repos/work/new-media/qmedia/vcpkg_installed/x64-osx/share/curl/CURLTargets-release.cmake">
+			<Option virtualFolder="CMake Files\vcpkg_installed\x64-osx\share\curl\"/>
+		</Unit>
+		<Unit filename="/Users/snandaku/repos/work/new-media/qmedia/vcpkg_installed/x64-osx/share/curl/CURLTargets.cmake">
+			<Option virtualFolder="CMake Files\vcpkg_installed\x64-osx\share\curl\"/>
+		</Unit>
+		<Unit filename="/Users/snandaku/repos/work/new-media/qmedia/vcpkg_installed/x64-osx/share/curl/vcpkg-cmake-wrapper.cmake">
+			<Option virtualFolder="CMake Files\vcpkg_installed\x64-osx\share\curl\"/>
+		</Unit>
+		<Unit filename="/Users/snandaku/repos/work/new-media/qmedia/vcpkg_installed/x64-osx/share/zlib/vcpkg-cmake-wrapper.cmake">
+			<Option virtualFolder="CMake Files\vcpkg_installed\x64-osx\share\zlib\"/>
+		</Unit>
+		<Unit filename="/Users/snandaku/repos/work/new-media/qmedia/vcpkg_installed/x64-osx/share/opus/OpusConfig.cmake">
+			<Option virtualFolder="CMake Files\vcpkg_installed\x64-osx\share\opus\"/>
+		</Unit>
+		<Unit filename="/Users/snandaku/repos/work/new-media/qmedia/vcpkg_installed/x64-osx/share/opus/OpusConfigVersion.cmake">
+			<Option virtualFolder="CMake Files\vcpkg_installed\x64-osx\share\opus\"/>
+		</Unit>
+		<Unit filename="/Users/snandaku/repos/work/new-media/qmedia/vcpkg_installed/x64-osx/share/opus/OpusTargets-debug.cmake">
+			<Option virtualFolder="CMake Files\vcpkg_installed\x64-osx\share\opus\"/>
+		</Unit>
+		<Unit filename="/Users/snandaku/repos/work/new-media/qmedia/vcpkg_installed/x64-osx/share/opus/OpusTargets-release.cmake">
+			<Option virtualFolder="CMake Files\vcpkg_installed\x64-osx\share\opus\"/>
+		</Unit>
+		<Unit filename="/Users/snandaku/repos/work/new-media/qmedia/vcpkg_installed/x64-osx/share/opus/OpusTargets.cmake">
+			<Option virtualFolder="CMake Files\vcpkg_installed\x64-osx\share\opus\"/>
+		</Unit>
+		<Unit filename="/Users/snandaku/repos/work/new-media/qmedia/vcpkg_installed/x64-osx/share/openssl/vcpkg-cmake-wrapper.cmake">
+			<Option virtualFolder="CMake Files\vcpkg_installed\x64-osx\share\openssl\"/>
+		</Unit>
+		<Unit filename="/Users/snandaku/repos/work/new-media/qmedia/vcpkg_installed/x64-osx/share/portaudio/portaudioConfig.cmake">
+			<Option virtualFolder="CMake Files\vcpkg_installed\x64-osx\share\portaudio\"/>
+		</Unit>
+		<Unit filename="/Users/snandaku/repos/work/new-media/qmedia/vcpkg_installed/x64-osx/share/portaudio/portaudioConfigVersion.cmake">
+			<Option virtualFolder="CMake Files\vcpkg_installed\x64-osx\share\portaudio\"/>
+		</Unit>
+		<Unit filename="/Users/snandaku/repos/work/new-media/qmedia/vcpkg_installed/x64-osx/share/portaudio/portaudioTargets-debug.cmake">
+			<Option virtualFolder="CMake Files\vcpkg_installed\x64-osx\share\portaudio\"/>
+		</Unit>
+		<Unit filename="/Users/snandaku/repos/work/new-media/qmedia/vcpkg_installed/x64-osx/share/portaudio/portaudioTargets-release.cmake">
+			<Option virtualFolder="CMake Files\vcpkg_installed\x64-osx\share\portaudio\"/>
+		</Unit>
+		<Unit filename="/Users/snandaku/repos/work/new-media/qmedia/vcpkg_installed/x64-osx/share/portaudio/portaudioTargets.cmake">
+			<Option virtualFolder="CMake Files\vcpkg_installed\x64-osx\share\portaudio\"/>
+		</Unit>
+		<Unit filename="/Users/snandaku/repos/work/new-media/qmedia/vcpkg_installed/x64-osx/share/doctest/doctest.cmake">
+			<Option virtualFolder="CMake Files\vcpkg_installed\x64-osx\share\doctest\"/>
+		</Unit>
+		<Unit filename="/Users/snandaku/repos/work/new-media/qmedia/vcpkg_installed/x64-osx/share/doctest/doctestConfig.cmake">
+			<Option virtualFolder="CMake Files\vcpkg_installed\x64-osx\share\doctest\"/>
+		</Unit>
+		<Unit filename="/Users/snandaku/repos/work/new-media/qmedia/vcpkg_installed/x64-osx/share/doctest/doctestConfigVersion.cmake">
+			<Option virtualFolder="CMake Files\vcpkg_installed\x64-osx\share\doctest\"/>
+		</Unit>
+		<Unit filename="/Users/snandaku/repos/work/new-media/qmedia/vcpkg_installed/x64-osx/share/doctest/doctestTargets.cmake">
+			<Option virtualFolder="CMake Files\vcpkg_installed\x64-osx\share\doctest\"/>
+		</Unit>
+		<Unit filename="/Users/snandaku/repos/work/new-media/qmedia/../media/vcpkg/scripts/buildsystems/vcpkg.cmake">
+			<Option virtualFolder="CMake Files\..\media\vcpkg\scripts\buildsystems\"/>
+		</Unit>
+		<Unit filename="/Users/snandaku/repos/work/new-media/qmedia/cmake/FindPTLS.cmake">
+			<Option virtualFolder="CMake Files\cmake\"/>
+		</Unit>
+		<Unit filename="/Users/snandaku/repos/work/new-media/qmedia/cmake/FindPicoquic.cmake">
+			<Option virtualFolder="CMake Files\cmake\"/>
+		</Unit>
+		<Unit filename="/Users/snandaku/repos/work/new-media/qmedia/cmake/FindQuicr.cmake">
+			<Option virtualFolder="CMake Files\cmake\"/>
+		</Unit>
+		<Unit filename="/Users/snandaku/repos/work/new-media/qmedia/cmake/dependencies.cmake">
+			<Option virtualFolder="CMake Files\cmake\"/>
+		</Unit>
+		<Unit filename="/Users/snandaku/repos/work/new-media/qmedia/_deps/sframe-src/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\_deps\sframe-src\"/>
+		</Unit>
+		<Unit filename="/Users/snandaku/repos/work/new-media/qmedia/third_party/tmp/gsl-extern-cfgcmd.txt.in">
+			<Option virtualFolder="CMake Files\third_party\tmp\"/>
+		</Unit>
+		<Unit filename="/Users/snandaku/repos/work/new-media/qmedia/src/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\"/>
+		</Unit>
+		<Unit filename="/Users/snandaku/repos/work/new-media/qmedia/src/extern/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\extern\"/>
+		</Unit>
+		<Unit filename="/Users/snandaku/repos/work/new-media/qmedia/cmd/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\cmd\"/>
+		</Unit>
+		<Unit filename="/Users/snandaku/repos/work/new-media/qmedia/test/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\test\"/>
+		</Unit>
+	</Project>
+</CodeBlocks_project_file>

@@ -140,6 +140,8 @@ void Neo::init(const std::string &remote_address,
             return;
         }
     }
+
+    log->info << "My ClientId: " << clientID << std::flush;
 }
 
 void Neo::publish(std::uint64_t source_id,
@@ -303,8 +305,11 @@ void Neo::sendVideoFrame(const char *buffer,
 
     // adding for delay from encode to reassembly in jitter
     auto now = std::chrono::system_clock::now();
-    auto now_ms = std::chrono::time_point_cast<std::chrono::milliseconds>(now).time_since_epoch().count();
-    packet->encodedTime = now_ms;
+    auto now_ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
+    log->info << "Encode Timestamp: " << packet->encodedSequenceNum
+              << ", time= " << now_ms << std::flush;
+
+    packet->frameReadyToEncodeTime = now_ms;
     // create object for managing packetization
     auto packets = std::make_shared<SimplePacketize>(std::move(packet),
                                                      1200 /* MTU */);

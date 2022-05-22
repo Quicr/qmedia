@@ -66,7 +66,7 @@ void Jitter::recordMetric(MeasurementType measurement_type,
     auto fields = Metrics::Measurement::Fields{{"count", 1}};
 
     auto now = std::chrono::system_clock::now();
-    auto now_ms = std::chrono::time_point_cast<std::chrono::milliseconds>(now).time_since_epoch().count();
+    auto now_ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
 
     switch (measurement_type)
     {
@@ -80,10 +80,12 @@ void Jitter::recordMetric(MeasurementType measurement_type,
                 measurements[measurement_type] = metrics->createMeasurement(
                     measurement_name.at(measurement_type), {});
             }
-            auto diff = now_ms - packet->encodedTime;
+            auto diff = now_ms - packet->frameReadyToEncodeTime;
             logger->info << "FrameReadyForDecode: frame:"
                          << packet->encodedSequenceNum
-                         << ", duation=" << diff << std::flush;
+                         << ", now_ms " << now_ms
+                         << ", encoded_time_ms " << packet->frameReadyToEncodeTime
+                         << ", duration=" << diff << std::flush;
             tags.push_back({"media_type", (uint64_t) media_type});
             fields.push_back({"duration", diff});
             auto entry = Metrics::Measurement::TimeEntry{std::move(tags),
@@ -163,6 +165,7 @@ bool Jitter::push(PacketPointer packet,
                 {
                     logger->info << "[jitter-v: assembled full frame:" << *raw << std::flush;
                     recordMetric(MeasurementType::FrameReadyForDecode,
+                                 raw,
                                  video.mq,
                                  MetaQueue::media_type::video,
                                  clientID,
