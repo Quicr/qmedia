@@ -133,7 +133,7 @@ private:
     // Metrics reported by transport manager
     enum struct MeasurementType
     {
-        FrameReadyForDecode, // report when a full frame was assembled
+        E2EFrameDelay, // report when a full frame was assembled
     };
     std::map<MeasurementType, Metrics::MeasurementPtr> measurements;
     void recordMetric(MeasurementType,

@@ -102,7 +102,7 @@ public:
     // packetization info
     PacketizeType packetizeType;
     uint64_t encodedSequenceNum;
-    uint64_t frameReadyToEncodeTime;
+    uint64_t frameEncodeTime;
     std::uint32_t chunkFragmentNum;
     std::uint32_t fragmentCount;
     std::uint32_t frameSize;

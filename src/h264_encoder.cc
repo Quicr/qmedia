@@ -188,6 +188,9 @@ int H264Encoder::encode(const char *input_buffer,
     total_bytes_encoded += output_bitstream.size();
     total_frames_encoded++;
 
+    logger->info << "h264Encoder: Output Frame type: "
+                 << outputFrame.eFrameType
+                 << std::flush;
     // success
     return outputFrame.eFrameType == videoFrameTypeIDR ? 1 : 0;
 }

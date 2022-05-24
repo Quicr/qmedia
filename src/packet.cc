@@ -159,7 +159,7 @@ struct PBEncoder
         hdr->set_sourceid(packet->sourceID);
         hdr->set_sourcerecordtime(packet->sourceRecordTime);
         hdr->set_sequencenumber(packet->encodedSequenceNum);
-        hdr->set_framereadytoencodetime(packet->frameReadyToEncodeTime);
+        hdr->set_framereadytoencodetime(packet->frameEncodeTime);
 
         switch (packet->packetizeType)
         {
@@ -328,7 +328,7 @@ struct PBDecoder
 
         packet_out->encodedSequenceNum = hdr.sequencenumber();
         packet_out->sourceRecordTime = hdr.sourcerecordtime();
-        packet_out->frameReadyToEncodeTime = hdr.framereadytoencodetime();
+        packet_out->frameEncodeTime = hdr.framereadytoencodetime();
         packet_out->sourceID = hdr.sourceid();
 
         switch (hdr.packetizetype())

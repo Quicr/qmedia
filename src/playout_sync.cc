@@ -43,7 +43,9 @@ Sync::sync_action Sync::getVideoAction(unsigned int audio_pop_delay,
         {
             if (frame->packet->videoFrameType != Packet::VideoFrameType::Idr)
             {
-                logger->debug << "[sync:videoAction:" << "first frame is not idr, discard]" << std::flush;
+                logger->info << "[sync:videoAction: First frame "
+                             << frame->packet->encodedSequenceNum
+                             << " is not idr, discard]" << std::flush;
                 action = pop_discard;
                 ++num_pop;
             }

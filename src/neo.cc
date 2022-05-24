@@ -306,10 +306,10 @@ void Neo::sendVideoFrame(const char *buffer,
     // adding for delay from encode to reassembly in jitter
     auto now = std::chrono::system_clock::now();
     auto now_ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
-    log->info << "Encode Timestamp: " << packet->encodedSequenceNum
-              << ", time= " << now_ms << std::flush;
+    log->info << "Encoded " << packet->encodedSequenceNum
+              << " FrameType: " <<( int) packet->videoFrameType << std::flush;
 
-    packet->frameReadyToEncodeTime = now_ms;
+    packet->frameEncodeTime = now_ms;
     // create object for managing packetization
     auto packets = std::make_shared<SimplePacketize>(std::move(packet),
                                                      1200 /* MTU */);
@@ -490,7 +490,6 @@ std::uint32_t Neo::getVideoFrame(uint64_t clientID,
     if (jitter_instance == nullptr) return 0;
 
     Packet::IdrRequestData idr_data = {clientID, 0, 0};
-    log->info << "getVideoFrame: Asking Jitter for video" << std::flush;
     recv_length = jitter_instance->popVideo(
         sourceID, width, height, format, timestamp, buffer, idr_data);
     if (idr_data.source_timestamp > 0)
@@ -520,6 +519,10 @@ void Neo::audioEncoderCallback(PacketPointer packet)
     // This assumes that the callback is coming from an opus encoder
     // Once we encode other media we need to change where this is set
     packet->mediaType = Packet::MediaType::Opus;
+
+    auto now = std::chrono::system_clock::now();
+    auto now_ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
+    packet->frameEncodeTime = now_ms;
 
     // this seems to be incomplete, we need media timeline driven
     // seq_no and may be also the media packet sequence number

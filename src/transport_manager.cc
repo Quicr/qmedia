@@ -324,7 +324,6 @@ void TransportManager::recordMetric(MeasurementType mtype,
         return;
     }
 
-    logger->info << "recordMetric in TxManager: " << (int) mtype << std::flush;
     // common tags
     auto tags = Metrics::Measurement::Tags{
         {"clientID", packetPointer->clientID},
@@ -440,7 +439,7 @@ bool TransportManager::recvDataFromNet(
         return false;
     }
 
-    logger->info << "[R]: "<< *packet <<  std::flush;
+    logger->debug << "[R]: "<< *packet <<  std::flush;
 
 #if 0
     // decrypt if its client transportManager
@@ -532,7 +531,7 @@ bool TransportManager::getDataToSendToNet(
     memcpy(
         &peer_info->addr, &(packet->peer_info.addr), packet->peer_info.addrLen);
     *addrLen = peer_info->addrLen;
-    logger->info << "[S]:" << *packet << std::flush;
+    logger->debug << "[S]:" << *packet << std::flush;
 
     data_out = std::move(packet->encoded_data);
 

@@ -150,7 +150,7 @@ public:
     LoggerPointer logger;
     Metrics::MetricsPtr metrics;
 private:
-    const std::string alpn = "quicr-h00";
+    const std::string alpn = "quicrq-h10";
     TransportContext xport_ctx;
     QuicRClientContext quicr_client_ctx;
     picoquic_quic_config_t config;

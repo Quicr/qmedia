@@ -49,7 +49,7 @@ void Jitter::recordMetric(MeasurementType measurement_type,
 {
     // TODO: metrics sould batch instead
     static const auto measurement_name = std::map<MeasurementType, std::string>{
-        {MeasurementType::FrameReadyForDecode, "FrameReadyForDecode"},
+        {MeasurementType::E2EFrameDelay, "E2EFrameDelay"},
     };
 
     if (!metrics)
@@ -70,7 +70,7 @@ void Jitter::recordMetric(MeasurementType measurement_type,
 
     switch (measurement_type)
     {
-        case MeasurementType::FrameReadyForDecode:
+        case MeasurementType::E2EFrameDelay:
         {
             if (!measurements.count(measurement_type))
             {
@@ -80,12 +80,12 @@ void Jitter::recordMetric(MeasurementType measurement_type,
                 measurements[measurement_type] = metrics->createMeasurement(
                     measurement_name.at(measurement_type), {});
             }
-            auto diff = now_ms - packet->frameReadyToEncodeTime;
-            logger->info << "FrameReadyForDecode: frame:"
+            auto diff = now_ms - packet->frameEncodeTime;
+            logger->debug << "FrameReadyForDecode: frame:"
                          << packet->encodedSequenceNum
                          << ", now_ms " << now_ms
-                         << ", encoded_time_ms " << packet->frameReadyToEncodeTime
-                         << ", duration=" << diff << std::flush;
+                         << ", encoded_time_ms " << packet->frameEncodeTime
+                          << ", duration=" << diff << std::flush;
             tags.push_back({"media_type", (uint64_t) media_type});
             fields.push_back({"duration", diff});
             auto entry = Metrics::Measurement::TimeEntry{std::move(tags),
@@ -164,7 +164,7 @@ bool Jitter::push(PacketPointer packet,
                 if (raw != nullptr)
                 {
                     logger->info << "[jitter-v: assembled full frame:" << *raw << std::flush;
-                    recordMetric(MeasurementType::FrameReadyForDecode,
+                    recordMetric(MeasurementType::E2EFrameDelay,
                                  raw,
                                  video.mq,
                                  MetaQueue::media_type::video,
@@ -195,6 +195,13 @@ bool Jitter::push(PacketPointer packet,
                 if (raw != nullptr)
                 {
                     // we got a decoded audio frame
+                    recordMetric(MeasurementType::E2EFrameDelay,
+                                 raw,
+                                 audio.mq,
+                                 MetaQueue::media_type::audio,
+                                 clientID,
+                                 sourceID);
+
                     audio.push(std::move(raw), sync.audio_seq_popped, now);
                     audio.insertAudioPLCs();
                     audio_jitter.updateJitterValues(

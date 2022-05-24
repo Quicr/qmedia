@@ -180,7 +180,7 @@ static int media_frame_publisher_fn(quicrq_media_source_action_enum action,
 
         *data_length = pub_ctx->transportManager->hasDataToSendToNet();
         if (*data_length > data_max_size) {
-            logger->info << "Transport Buffer Small: transport buffer size=" << data_max_size
+            logger->debug << "Transport Buffer Small: transport buffer size=" << data_max_size
                       << ", " << "data size=" << *data_length << std::flush;
             *data_length = 0;
             *is_still_active = 1;
@@ -195,7 +195,7 @@ static int media_frame_publisher_fn(quicrq_media_source_action_enum action,
                 send_packet.data, &send_packet.peer, &send_packet.peer.addrLen);
             if (got)
             {
-                logger->info << "Copied data to the quicr transport:" << *data_length << std::flush;
+                logger->debug << "Copied data to the quicr transport:" << *data_length << std::flush;
                 std::copy(
                     send_packet.data.begin(), send_packet.data.end(), data);
                 *is_last_segment = 1;
@@ -229,7 +229,7 @@ media_consumer_frame_ready(void *media_ctx,
     auto *cons_ctx = (ConsumerContext *) media_ctx;
     auto logger = cons_ctx->transport->logger;
 
-    logger->info << "[frame_ready: id:" << frame_id
+    logger->debug << "[frame_ready: id:" << frame_id
                  << ", frame_mode:" << (int) frame_mode
                  << ",data_len:" << data_length << "]" << std::flush;
 
@@ -510,7 +510,7 @@ NetTransportQUICR::NetTransportQUICR(TransportManager *t,
 {
     logger->info << "Quicr Client Transport" << std::flush;
     picoquic_config_init(&config);
-    picoquic_config_set_option(&config, picoquic_option_ALPN, alpn.c_str());
+    picoquic_config_set_option(&config, picoquic_option_ALPN, QUICRQ_ALPN);
     debug_set_stream(stdout);
     quic = picoquic_create_and_configure(
         &config, quicrq_callback, quicr_ctx, picoquic_current_time(), NULL);
