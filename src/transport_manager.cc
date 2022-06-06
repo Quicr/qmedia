@@ -106,6 +106,7 @@ PacketPointer TransportManager::recv()
             // send ack TODO: wire it through retrans module once we have it
             if (!isLoopback)
             {
+#if 0
                 PacketPointer content_ack = std::make_unique<Packet>();
                 content_ack->packetType = Packet::Type::StreamContentAck;
                 content_ack->transportSequenceNumber =
@@ -118,6 +119,7 @@ PacketPointer TransportManager::recv()
                 content_ack->peer_info.addrLen = ret->peer_info.addrLen;
                 content_ack->clientID = ret->clientID;
                 send(std::move(content_ack));
+#endif
             }
 
             break;

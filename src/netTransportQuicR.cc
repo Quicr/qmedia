@@ -99,14 +99,16 @@ int quicrq_app_loop_cb_check_fin(TransportContext *cb_ctx)
 
     /* if a client, exit the loop if connection is gone. */
     quicrq_cnx_ctx_t *cnx_ctx = quicrq_first_connection(cb_ctx->qr_ctx);
-    if (cnx_ctx == NULL || quicrq_is_cnx_disconnected(cnx_ctx))
+    if (cnx_ctx == nullptr || quicrq_is_cnx_disconnected(cnx_ctx))
     {
         ret = PICOQUIC_NO_ERROR_TERMINATE_PACKET_LOOP;
     }
     else if (!quicrq_cnx_has_stream(cnx_ctx))
     {
-        ret = quicrq_close_cnx(cnx_ctx);
+        // todo: don't close if no media has been posted yet
+        // ret = quicrq_close_cnx(cnx_ctx);
     }
+
     return ret;
 }
 
@@ -133,10 +135,10 @@ void quicrq_app_check_source_time(TransportContext *cb_ctx,
         // log delta
         return;
     }
-    else if (time_check_arg->delta_t > 5000)
+    else if (time_check_arg->delta_t > 1000)
     {
         // is this a good choice?
-        time_check_arg->delta_t = 5000;
+        time_check_arg->delta_t = 1000;
     }
     // log here delta
 }
@@ -437,8 +439,10 @@ int quicrq_app_loop_cb(picoquic_quic_t *quic,
             case picoquic_packet_loop_after_send:
                 /* Post send callback. Check whether sources need to be awakened
                  */
+#if not defined(USE_OBJECT_API)
                 quicrq_app_wake_up_sources(cb_ctx,
                                            picoquic_get_quic_time(quic));
+#endif
                 /* if a client, exit the loop if connection is gone. */
                 ret = quicrq_app_loop_cb_check_fin(cb_ctx);
                 break;
@@ -475,6 +479,7 @@ bool NetTransportQUICR::doRecvs()
 
 bool NetTransportQUICR::doSends()
 {
+    // todo : put it on the quicrq thread.
 #if defined(USE_OBJECT_API)
     NetTransport::Data send_packet;
     auto got = transportManager->getDataToSendToNet(send_packet);
@@ -488,10 +493,19 @@ bool NetTransportQUICR::doSends()
     assert(publish_ctx.object_source_ctx);
     logger->info << "Copied data to the quicr transport:" << send_packet.data.size()
                   <<  ", for source: " << publish_ctx.url <<std::flush;
+
     auto ret = quicrq_publish_object(publish_ctx.object_source_ctx,
                           reinterpret_cast<uint8_t *>(send_packet.data.data()),
                           send_packet.data.size(),
                           nullptr);
+    assert(ret == 0);
+
+    ret = quicrq_cnx_post_media(
+        cnx_ctx,
+        reinterpret_cast<uint8_t *>(const_cast<char *>(publish_ctx.url.data())),
+        publish_ctx.url.length(),
+        true);
+
     assert(ret == 0);
 
     return true;

@@ -172,6 +172,7 @@ int main(int argc, char *argv[])
         auto quicr_transport = tmp.lock();
         quicr_transport->publish(
             source_id, Packet::MediaType::Opus, "forty_bytes_alice");
+
         // start the transport
         quicr_transport->start();
 
