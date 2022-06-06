@@ -151,13 +151,21 @@ bool Jitter::push(PacketPointer packet,
             case Packet::MediaType::AV1:
             case Packet::MediaType::Raw:
             {
-                if (video.assembler == nullptr)
-                {
-                    video.assembler = std::make_shared<SimpleVideoAssembler>();
-                    new_stream = true;
-                    logger->info << "New video sourceID: " << sourceID
-                                 << std::flush;
-                    video.sourceID = packet->sourceID;
+
+                if (packet->fragmentCount == 1) {
+                    // packet wasn't framgmented by us
+                    logger->info << "[jitter-v: no assembly needed:" << *packet << std::flush;
+                    recordMetric(MeasurementType::E2EFrameDelay,
+                                 packet,
+                                 video.mq,
+                                 MetaQueue::media_type::video,
+                                 clientID,
+                                 sourceID);
+                    // we got assembled frame, add it to jitter queue
+                    video.push(std::move(packet),
+                               sync.video_seq_popped,
+                               now);
+                    break;
                 }
 
                 PacketPointer raw = video.assembler->push(std::move(packet));
@@ -172,7 +180,6 @@ bool Jitter::push(PacketPointer packet,
                                  sourceID);
                     // we got assembled frame, add it to jitter queue
                     video.push(std::move(raw), sync.video_seq_popped, now);
-
                 }
             }
             break;

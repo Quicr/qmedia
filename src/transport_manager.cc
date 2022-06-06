@@ -22,6 +22,11 @@ static std::string to_hex(const std::vector<uint8_t> &data)
     return hex.str();
 }
 
+static std::string to_hex(const std::string& data) {
+    auto vec = std::vector<uint8_t>{data.begin(), data.end()};
+    return to_hex(vec);
+}
+
 TransportManager::TransportManager(NetTransport::Type type,
                                    const std::string &sfuName_in,
                                    int sfuPort_in,
@@ -148,13 +153,6 @@ void TransportManager::runNetSend()
         send_cv.wait(ulock,
                      [&]() -> bool { return (shutDown || !sendQ.empty()); });
         ulock.unlock();
-        /*
-                if (sendQ.empty())
-                {
-                    std::this_thread::sleep_for(std::chrono::milliseconds(1));
-                    continue;
-                }
-        */
         if (!netTransport->doSends())
         {
             // TODO accumulate count and report metric
@@ -199,7 +197,7 @@ ClientTransportManager::ClientTransportManager(
 
 void ClientTransportManager::start()
 {
-    recvThread = std::thread(recvThreadFunc, this);
+    // recvThread = std::thread(recvThreadFunc, this);
     sendThread = std::thread(sendThreadFunc, this);
 }
 
@@ -211,24 +209,26 @@ void ClientTransportManager::send(PacketPointer packet)
     auto conn_info = netTransport->getConnectionInfo();
     memcpy(&(packet->peer_info.addr), &(conn_info.addr), conn_info.addrLen);
     packet->peer_info.addrLen = conn_info.addrLen;
+
     // Set the packet transport sequence number
     if (packet->packetType != Packet::Type::StreamContentAck)
     {
         packet->transportSequenceNumber = nextTransportSeq;
     }
+
     nextTransportSeq++;
 
     if (!netEncode(packet.get(), packet->encoded_data))
     {
-        // TODO
         logger->error << "Packet encoding failed" << std::flush;
         return;
     }
+
     {
         std::lock_guard<std::mutex> lock(sendQMutex);
-        sendQ.push(std::move(packet));
-        // TODO - check Q not too deep
+        sendQ.push_back(std::move(packet));
     }
+
     // Notify that a packet is ready to send
     send_cv.notify_all();
 }
@@ -298,7 +298,7 @@ void ServerTransportManager::send(PacketPointer packet)
 
     {
         std::lock_guard<std::mutex> lock(sendQMutex);
-        sendQ.push(std::move(packet));
+        sendQ.push_back(std::move(packet));
         // TODO - check Q not too deep
     }
     // Notify that a packet is ready to send
@@ -433,13 +433,17 @@ bool TransportManager::recvDataFromNet(
             std::back_inserter(packet->peer_info.transport_connection_id));
     }
 
+    logger->info << "recvDataFromNet [Hex:"
+                 << to_hex(data_in)
+                 << "]" << std::flush;
+
     if (!netDecode(data_in, packet.get()))
     {
         logger->error << "Packet decoding failed" << std::flush;
         return false;
     }
 
-    logger->debug << "[R]: "<< *packet <<  std::flush;
+    logger->info << "[Decode Success]: "<< *packet <<  std::flush;
 
 #if 0
     // decrypt if its client transportManager
@@ -477,6 +481,111 @@ bool TransportManager::recvDataFromNet(
     return true;
 }
 
+bool TransportManager::prepareDataToSendToNet(PacketPointer& packet,
+                                              std::string &data_out,
+                                              NetTransport::PeerConnectionInfo *peer_info,
+                                              socklen_t *addrLen)
+{
+
+    if (!packet || packet->encoded_data.empty()) {
+        logger->info << "prepareDataToSendToNet: empty encoded data" << std::flush;
+        return false;
+    }
+
+    if (!packet->peer_info.transport_connection_id.empty())
+    {
+        auto &cnx_id = packet->peer_info.transport_connection_id;
+        std::copy(cnx_id.begin(),
+                  cnx_id.end(),
+                  std::back_inserter(peer_info->transport_connection_id));
+    }
+
+    peer_info->addrLen = packet->peer_info.addrLen;
+    memcpy(
+        &peer_info->addr, &(packet->peer_info.addr), packet->peer_info.addrLen);
+    *addrLen = peer_info->addrLen;
+
+    data_out = std::move(packet->encoded_data);
+
+    return true;
+}
+
+bool TransportManager::getDataToSendToNet(Packet::MediaType media_type,
+                                          std::string &data_out,
+                                          NetTransport::PeerConnectionInfo *info,
+                                          socklen_t *addrLen)
+{
+    logger->info << "getDataToSendToNet: asking for " << (int) media_type << std::flush;
+    PacketPointer packet;
+    {
+        std::lock_guard<std::mutex> lock(sendQMutex);
+        if (sendQ.empty())
+        {
+            return false;
+        }
+
+        auto it = std::find_if(sendQ.rbegin(),
+                               sendQ.rend(),
+                               [&, media_type](const PacketPointer& elem) {
+                if(elem->mediaType == media_type) {
+                    logger->info << "MediaType: " << media_type
+                                 << ", Found element: " << *elem << std::flush;
+                }
+                return elem->mediaType == media_type;
+        });
+
+        if(it == std::rend(sendQ)) {
+            return false;
+        }
+
+        Packet* p = (*it).release();
+        packet.reset(p);
+        sendQ.erase((it + 1).base());
+    }
+
+    logger->info << "getDataToSendToNet: media_type" << (int) media_type
+                 << ", Packet:" << *packet << std::flush;
+    logger->info << "getDataToSendToNet [Hex:"
+                 << to_hex(packet->encoded_data)
+                 << "]" << std::flush;
+    return prepareDataToSendToNet(packet, data_out, info, addrLen);
+}
+
+bool TransportManager::getDataToSendToNet(NetTransport::Data& data) {
+    // get packet to send from Q
+    PacketPointer packet = nullptr;
+    {
+        std::lock_guard<std::mutex> lock(sendQMutex);
+        if (sendQ.empty())
+        {
+            return false;
+        }
+        packet = std::move(sendQ.front());
+        sendQ.pop_front();
+    }
+
+    assert(packet);
+
+    if (!packet->peer_info.transport_connection_id.empty())
+    {
+        auto &cnx_id = packet->peer_info.transport_connection_id;
+        std::copy(cnx_id.begin(),
+                  cnx_id.end(),
+                  std::back_inserter(data.peer.transport_connection_id));
+    }
+
+    data.source_id = packet->sourceID;
+    data.peer.addrLen = packet->peer_info.addrLen;
+    memcpy(
+        &data.peer.addr, &(packet->peer_info.addr), packet->peer_info.addrLen);
+
+    logger->debug << "[S]:" << *packet << std::flush;
+
+    data.data = std::move(packet->encoded_data);
+
+    return true;
+}
+
 bool TransportManager::getDataToSendToNet(
     std::string &data_out,
     NetTransport::PeerConnectionInfo *peer_info,
@@ -491,14 +600,12 @@ bool TransportManager::getDataToSendToNet(
             return false;
         }
         packet = std::move(sendQ.front());
-        sendQ.pop();
+        sendQ.pop_front();
     }
+
     assert(packet);
 
-    if (Packet::Type::StreamContent == packet->packetType)
-    {
-        assert(!packet->data.empty());
-    }
+
 #if 0
     // TODO - move encryption to when added to Q
     // TODO - checking data empty is not a fool proof and extensible way

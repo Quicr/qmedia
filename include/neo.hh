@@ -131,7 +131,9 @@ public:
     void publish(uint64_t source_id,
                  Packet::MediaType media_type,
                  std::string url);
-    void subscribe(Packet::MediaType mediaType, std::string url);
+    void subscribe(uint64_t source_id,
+                   Packet::MediaType mediaType,
+                   std::string url);
     void start_transport(NetTransport::Type transport_type);
 
 protected:

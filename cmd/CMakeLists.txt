@@ -1,6 +1,7 @@
 add_executable(forty forty-bytes.cc)
 target_link_libraries( forty PUBLIC neoMedia)
 
+if (FALSE)
 find_package(portaudio QUIET)
 if(portaudio_FOUND)
     add_executable( sound sound.cc)
@@ -14,3 +15,4 @@ if(portaudio_FOUND)
 else(portaudio_FOUND)
     message(STATUS "Skipping building sound as missing portaudio")
 endif(portaudio_FOUND)
+endif()

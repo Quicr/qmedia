@@ -20,9 +20,8 @@ public:
     {
         std::string data;
         PeerConnectionInfo peer;
-        uint64_t transport_data_id;
-        size_t transport_data_length;
-        bool empty() { return data.empty(); }
+        uint64_t source_id;
+        bool empty() const { return data.empty(); }
     };
 
     enum Type

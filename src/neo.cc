@@ -68,7 +68,7 @@ void Neo::init(const std::string &remote_address,
             remote_port,
             metrics,
             log);
-
+        transport->start();
         // setup sources
     }
     else
@@ -148,23 +148,31 @@ void Neo::publish(std::uint64_t source_id,
                   Packet::MediaType media_type,
                   std::string url)
 {
+    // Note: there is 1:1 mapping between source_id and object name
     auto pkt_transport = transport->transport();
     std::weak_ptr<NetTransportQUICR> tmp =
         std::static_pointer_cast<NetTransportQUICR>(pkt_transport.lock());
     auto quicr_transport = tmp.lock();
+
+    url += "/" + std::to_string((int) media_type);
     quicr_transport->publish(source_id, media_type, url);
+    log->info << "SourceID: " << source_id << ", Publish Url:" << url << std::flush;
 }
 
-void Neo::subscribe(Packet::MediaType mediaType, std::string url)
+void Neo::subscribe(uint64_t source_id, Packet::MediaType media_type, std::string url)
 {
     auto pkt_transport = transport->transport();
     std::weak_ptr<NetTransportQUICR> tmp =
         std::static_pointer_cast<NetTransportQUICR>(pkt_transport.lock());
     auto quicr_transport = tmp.lock();
-    quicr_transport->subscribe(mediaType, url);
+
+    url += "/" + std::to_string((int) media_type);
+    quicr_transport->subscribe(source_id, media_type, url);
+
+    log->info << " Subscribe Url:" << url << std::flush;
 }
 
-void Neo::start_transport(NetTransport::Type transport_type)
+void Neo::start_transport(NetTransport::Type transport_type_in)
 {
     if (transport_type == NetTransport::Type::QUICR)
     {
@@ -213,7 +221,7 @@ void Neo::doWork()
 
             if (jitter_instance != nullptr)
             {
-                log->debug << "DoWork: Adding to jitter:" << *packet << std::flush;
+                log->info << "DoWork: Adding to jitter:" << *packet << std::flush;
                 new_stream = jitter_instance->push(std::move(packet));
                 // jitter assembles packets to frames, decodes, conceals
                 // and makes frames available to client
@@ -310,6 +318,15 @@ void Neo::sendVideoFrame(const char *buffer,
               << " FrameType: " <<( int) packet->videoFrameType << std::flush;
 
     packet->frameEncodeTime = now_ms;
+    if (transport_type == NetTransport::Type::QUICR) {
+        // quicr transport handles its own fragmentation and reassemble
+        log->info << "SendVideoFrame: Sending full object:"
+                  << packet->data.size() << std::flush;
+        packet->fragmentCount = 1;
+        transport->send(std::move(packet));
+        return;
+    }
+
     // create object for managing packetization
     auto packets = std::make_shared<SimplePacketize>(std::move(packet),
                                                      1200 /* MTU */);

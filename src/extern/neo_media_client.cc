@@ -155,12 +155,14 @@ extern "C"
     }
 
     void CALL subscribe(NeoMediaInstance instance,
+                        std::uint64_t source_id,
                         std::uint16_t media_type,
                         const char *url,
                         std::uint16_t url_length)
     {
         auto neo = (Neo *) instance;
-        neo->subscribe((Packet::MediaType) media_type,
+        neo->subscribe(source_id,
+                       (Packet::MediaType) media_type,
                        std::string(url, url + url_length));
     }
 

@@ -3,7 +3,7 @@
 
 #include <string>
 #include <thread>
-#include <queue>
+#include <deque>
 #include <cstdint>
 #include <mutex>
 #include <cassert>
@@ -121,6 +121,14 @@ public:
                             NetTransport::PeerConnectionInfo *info,
                             socklen_t *addrLen);
 
+    bool getDataToSendToNet(NetTransport::Data& data);
+
+    // todo: we might not need this.
+    bool getDataToSendToNet(Packet::MediaType media_type,
+                            std::string &data_out,
+                            NetTransport::PeerConnectionInfo *info,
+                            socklen_t *addrLen);
+
     size_t hasDataToSendToNet();
 
     virtual bool transport_ready() const = 0;
@@ -153,7 +161,6 @@ protected:
     // rtx handle (used by clientTxMgr today)
     std::unique_ptr<RtxManager> rtx_mgr;
 
-protected:
     virtual ~TransportManager();
 
     void runNetRecv();
@@ -168,8 +175,9 @@ protected:
     }
 
     void runNetSend();
-    std::queue<PacketPointer> sendQ;
+    std::deque<PacketPointer> sendQ;
     std::mutex sendQMutex;
+
     std::thread sendThread;
     static int sendThreadFunc(TransportManager *t)
     {
@@ -190,6 +198,14 @@ protected:
     uint64_t nextTransportSeq = 0;        // Next packet transport sequence
                                           // number
 private:
+
+    bool prepareDataToSendToNet(
+        PacketPointer& packet,
+        std::string &data_out,
+        NetTransport::PeerConnectionInfo *peer_info,
+        socklen_t *addrLen);
+
+
     const int NUM_METRICS_TO_ACCUMULATE = 50;
     int num_metrics_accumulated = 0;
 };
@@ -207,12 +223,12 @@ public:
     virtual ~ClientTransportManager();
     void start();
 
-    virtual Type type() const { return Type::Client; }
+    virtual Type type() const override { return Type::Client; }
 
-    virtual bool transport_ready() const { return netTransport->ready(); }
+    virtual bool transport_ready() const override{ return netTransport->ready(); }
 
     // queues this to be sent thread safe
-    virtual void send(PacketPointer packet);
+    virtual void send(PacketPointer packet) override;
 
     // Initialize sframe context with the base secret provided by MLS key
     // exchange Note: This is hard coded secret until we bring in MLS
