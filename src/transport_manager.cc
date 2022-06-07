@@ -127,7 +127,6 @@ PacketPointer TransportManager::recv()
             // Send to transmission manager module
             // txManager->ackHandle(ret->aggregateSequenceNumber);
             break;
-            break;
         default:
             logger->debug << "Unsupported packet_type" << std::endl;
     }
@@ -200,7 +199,7 @@ ClientTransportManager::ClientTransportManager(
 void ClientTransportManager::start()
 {
     // recvThread = std::thread(recvThreadFunc, this);
-    sendThread = std::thread(sendThreadFunc, this);
+    //sendThread = std::thread(sendThreadFunc, this);
 }
 
 ClientTransportManager::~ClientTransportManager() = default;
@@ -435,7 +434,7 @@ bool TransportManager::recvDataFromNet(
             std::back_inserter(packet->peer_info.transport_connection_id));
     }
 
-    logger->info << "recvDataFromNet [Hex:"
+    logger->debug << "recvDataFromNet [Hex:"
                  << to_hex(data_in)
                  << "]" << std::flush;
 
@@ -581,7 +580,7 @@ bool TransportManager::getDataToSendToNet(NetTransport::Data& data) {
     memcpy(
         &data.peer.addr, &(packet->peer_info.addr), packet->peer_info.addrLen);
 
-    logger->debug << "[S]:" << *packet << std::flush;
+    logger->info << "[S]:" << *packet << std::flush;
 
     data.data = std::move(packet->encoded_data);
 

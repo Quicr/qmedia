@@ -43,6 +43,7 @@ struct TransportContext
 {
     uint16_t port;
     quicrq_ctx_t *qr_ctx;
+    quicrq_cnx_ctx_t *cn_ctx;
     TransportManager *transportManager;
     NetTransportQUICR *transport;
     bytes local_connection_id;

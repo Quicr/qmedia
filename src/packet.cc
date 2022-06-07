@@ -68,7 +68,7 @@ std::ostream &operator<<(std::ostream &os, const Packet::MediaType &mediaType)
 
 std::ostream & operator<<(std::ostream& os, const Packet& packet)
 {
-    os << "[Type:" << packet.packetType <<", MediaType:"
+    os << "[SourceId: " << packet.sourceID << ", Type:" << packet.packetType <<", MediaType:"
         << packet.mediaType << ", EncSeqNo:" << packet.encodedSequenceNum
         << ",Fragment# " << packet.chunkFragmentNum << ",FragCount:"
         << packet.fragmentCount << ",EncSize:" << packet.encoded_data.size()

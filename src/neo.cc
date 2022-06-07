@@ -69,7 +69,6 @@ void Neo::init(const std::string &remote_address,
             metrics,
             log);
         transport->start();
-        // setup sources
     }
     else
     {
