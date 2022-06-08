@@ -249,17 +249,17 @@ void Neo::sendAudio(const char *buffer,
                     uint64_t sourceID)
 {
 
-    if (media_dir != MediaDirection::publish_only && media_dir != MediaDirection::publish_subscribe) {
-        return;
-    }
-
-    std::shared_ptr<AudioEncoder> audio_encoder = getAudioEncoder(sourceID);
-
-    if (audio_encoder != nullptr)
+    if (media_dir == MediaDirection::publish_only || media_dir == MediaDirection::publish_subscribe)
     {
-        log->info << "sendAudio: SourceId:" << sourceID << ", length:" << length << std::flush;
-        audio_encoder->encodeFrame(
-            buffer, length, timestamp, mutedAudioEmptyFrames);
+        std::shared_ptr<AudioEncoder> audio_encoder = getAudioEncoder(sourceID);
+
+        if (audio_encoder != nullptr)
+        {
+            log->info << "sendAudio: SourceId:" << sourceID
+                      << ", length:" << length << std::flush;
+            audio_encoder->encodeFrame(
+                buffer, length, timestamp, mutedAudioEmptyFrames);
+        }
     }
 }
 
