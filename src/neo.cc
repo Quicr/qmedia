@@ -248,10 +248,16 @@ void Neo::sendAudio(const char *buffer,
                     uint64_t timestamp,
                     uint64_t sourceID)
 {
+
+    if (media_dir != MediaDirection::publish_only && media_dir != MediaDirection::publish_subscribe) {
+        return;
+    }
+
     std::shared_ptr<AudioEncoder> audio_encoder = getAudioEncoder(sourceID);
 
     if (audio_encoder != nullptr)
     {
+        log->info << "sendAudio: SourceId:" << sourceID << ", length:" << length << std::flush;
         audio_encoder->encodeFrame(
             buffer, length, timestamp, mutedAudioEmptyFrames);
     }
@@ -478,17 +484,23 @@ int Neo::getAudio(uint64_t clientID,
 
     PacketPointer packet;
     JitterInterface::JitterIntPtr jitter = getJitter(clientID);
-    if (jitter == nullptr) return 0;
+    if (jitter == nullptr) {
+        log->info << "GetAudio: No Jitter" << std::flush;
+        return 0;
+    }
 
     packet = jitter->popAudio(sourceID, max_len);
 
-    if (packet != NULL)
+    if (packet != nullptr)
     {
         timestamp = packet->sourceRecordTime;
         *buffer = &packet->data[0];
         recv_length = packet->data.size();
         *packetToFree = packet.release();
     }
+    log->info << "GetAudio: Source:" << sourceID
+              << ", got audio-len:" << recv_length << std::flush;
+
     return recv_length;
 }
 
@@ -552,6 +564,7 @@ void Neo::audioEncoderCallback(PacketPointer packet)
     }
 
     // send it over the network
+    log->info << "Opus Encoded Audio Size:" << packet->data.size() << std::flush;
     transport->send(std::move(packet));
 }
 
