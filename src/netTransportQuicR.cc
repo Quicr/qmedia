@@ -353,13 +353,13 @@ int object_stream_consumer_fn(
 
     auto cons_ctx = (ConsumerContext *) object_consumer_ctx;
     auto& logger = cons_ctx->transport->logger;
-    logger->info << cons_ctx->url << ": object_stream_consumer_fn: action:" << (int) action << std::flush;
+    //logger->info << cons_ctx->url << ": object_stream_consumer_fn: action:" << (int) action << std::flush;
     int ret = 0;
     switch (action) {
         case quicrq_media_datagram_ready:
         {
-            logger->info << "quicrq_media_datagram_ready, object:" << object_id
-                         << std::flush;
+           // logger->info << "quicrq_media_datagram_ready, object:" << object_id
+           //              << std::flush;
             struct sockaddr_storage stored_addr;
             struct sockaddr *peer_addr = nullptr;
             quicrq_get_peer_address(cons_ctx->cnx_ctx, &stored_addr);
@@ -471,9 +471,9 @@ int quicrq_app_loop_cb(picoquic_quic_t *quic,
 
     // extract the source context
     auto& publish_ctx = cb_ctx->transport->get_publisher_context(send_packet.source_id);
-    logger->info << "[loop] doSends: source_id:" << send_packet.source_id << std::flush;
+    logger->debug << "[loop] doSends: source_id:" << send_packet.source_id << std::flush;
     assert(publish_ctx.object_source_ctx);
-    logger->info << "doSends: Copied data to the quicr transport:" << send_packet.data.size()
+    logger->debug << "doSends: Copied data to the quicr transport:" << send_packet.data.size()
                  <<  ", for source: " << publish_ctx.url <<std::flush;
 
     ret = quicrq_publish_object(publish_ctx.object_source_ctx,
@@ -521,9 +521,9 @@ bool NetTransportQUICR::doSends()
 
     // extract the source context
     auto& publish_ctx = publishers.at(send_packet.source_id);
-    logger->info << "doSends: source_id:" << send_packet.source_id << std::flush;
+    logger->debug << "doSends: source_id:" << send_packet.source_id << std::flush;
     assert(publish_ctx.object_source_ctx);
-    logger->info << "doSends: Copied data to the quicr transport:" << send_packet.data.size()
+    logger->debug << "doSends: Copied data to the quicr transport:" << send_packet.data.size()
                   <<  ", for source: " << publish_ctx.url <<std::flush;
 
     auto ret = quicrq_publish_object(publish_ctx.object_source_ctx,

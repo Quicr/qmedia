@@ -442,7 +442,7 @@ bool TransportManager::recvDataFromNet(
         return false;
     }
 
-    logger->info << "[Decode Success]: "<< *packet <<  std::flush;
+    logger->debug << "[Decode Success]: "<< *packet <<  std::flush;
 
 #if 0
     // decrypt if its client transportManager
@@ -578,7 +578,7 @@ bool TransportManager::getDataToSendToNet(NetTransport::Data& data) {
     memcpy(
         &data.peer.addr, &(packet->peer_info.addr), packet->peer_info.addrLen);
 
-    logger->info << "[S]:" << *packet << std::flush;
+    logger->debug << "[S]:" << *packet << std::flush;
 
     data.data = std::move(packet->encoded_data);
 

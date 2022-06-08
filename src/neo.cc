@@ -220,7 +220,7 @@ void Neo::doWork()
 
             if (jitter_instance != nullptr)
             {
-                log->info << "DoWork: Adding to jitter:" << *packet << std::flush;
+                log->debug << "DoWork: Adding to jitter:" << *packet << std::flush;
                 new_stream = jitter_instance->push(std::move(packet));
                 // jitter assembles packets to frames, decodes, conceals
                 // and makes frames available to client
@@ -255,7 +255,7 @@ void Neo::sendAudio(const char *buffer,
 
         if (audio_encoder != nullptr)
         {
-            log->info << "sendAudio: SourceId:" << sourceID
+            log->debug << "sendAudio: SourceId:" << sourceID
                       << ", length:" << length << std::flush;
             audio_encoder->encodeFrame(
                 buffer, length, timestamp, mutedAudioEmptyFrames);
@@ -319,13 +319,13 @@ void Neo::sendVideoFrame(const char *buffer,
     // adding for delay from encode to reassembly in jitter
     auto now = std::chrono::system_clock::now();
     auto now_ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
-    log->info << "Encoded " << packet->encodedSequenceNum
+    log->debug << "Encoded " << packet->encodedSequenceNum
               << " FrameType: " <<( int) packet->videoFrameType << std::flush;
 
     packet->frameEncodeTime = now_ms;
     if (transport_type == NetTransport::Type::QUICR) {
         // quicr transport handles its own fragmentation and reassemble
-        log->info << "SendVideoFrame: Sending full object:"
+        log->debug << "SendVideoFrame: Sending full object:"
                   << packet->data.size() << std::flush;
         packet->fragmentCount = 1;
         transport->send(std::move(packet));
@@ -485,7 +485,6 @@ int Neo::getAudio(uint64_t clientID,
     PacketPointer packet;
     JitterInterface::JitterIntPtr jitter = getJitter(clientID);
     if (jitter == nullptr) {
-        log->info << "GetAudio: No Jitter" << std::flush;
         return 0;
     }
 
@@ -498,9 +497,6 @@ int Neo::getAudio(uint64_t clientID,
         recv_length = packet->data.size();
         *packetToFree = packet.release();
     }
-    log->info << "GetAudio: Source:" << sourceID
-              << ", got audio-len:" << recv_length << std::flush;
-
     return recv_length;
 }
 
@@ -513,16 +509,17 @@ std::uint32_t Neo::getVideoFrame(uint64_t clientID,
                                  unsigned char **buffer)
 {
     int recv_length = 0;
-
     JitterInterface::JitterIntPtr jitter_instance = getJitter(clientID);
-    if (jitter_instance == nullptr) return 0;
+    if (jitter_instance == nullptr) {
+        return 0;
+    }
 
     Packet::IdrRequestData idr_data = {clientID, 0, 0};
     recv_length = jitter_instance->popVideo(
         sourceID, width, height, format, timestamp, buffer, idr_data);
     if (idr_data.source_timestamp > 0)
     {
-        log->debug << "jitter asked for keyFrame, sending IDR" << std::flush;
+        log->info << "jitter asked for keyFrame, sending IDR" << std::flush;
         PacketPointer idr = std::make_unique<Packet>();
         idr->packetType = Packet::Type::IdrRequest;
         idr->transportSequenceNumber = 0;
@@ -564,7 +561,7 @@ void Neo::audioEncoderCallback(PacketPointer packet)
     }
 
     // send it over the network
-    log->info << "Opus Encoded Audio Size:" << packet->data.size() << std::flush;
+    log->debug << "Opus Encoded Audio Size:" << packet->data.size() << std::flush;
     transport->send(std::move(packet));
 }
 
