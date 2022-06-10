@@ -12,6 +12,9 @@ void PopFrequencyCounter::updatePopFrequency(
     std::chrono::steady_clock::time_point now)
 {
     std::lock_guard<std::mutex> lock(pMutex);
+    if(pop_time.empty()) {
+        return ;
+    }
     if (!first_pop)
     {
         auto delta = std::chrono::duration_cast<std::chrono::milliseconds>(

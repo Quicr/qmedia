@@ -65,6 +65,20 @@ std::ostream &operator<<(std::ostream &os, const Packet::MediaType &mediaType)
     return os;
 }
 
+std::ostream &operator<<(std::ostream &os, const Packet::VideoFrameType &type)
+{
+    switch (type)
+    {
+        case Packet::VideoFrameType::Idr:
+            os << "IDR";
+            break;
+        case Packet::VideoFrameType::None:
+            os << "NONE";
+            break;
+    }
+    return os;
+}
+
 
 std::ostream & operator<<(std::ostream& os, const Packet& packet)
 {
@@ -72,7 +86,8 @@ std::ostream & operator<<(std::ostream& os, const Packet& packet)
         << packet.mediaType << ", EncSeqNo:" << packet.encodedSequenceNum
         << ",Fragment# " << packet.chunkFragmentNum << ",FragCount:"
         << packet.fragmentCount << ",EncSize:" << packet.encoded_data.size()
-        << ",DataSize:" << packet.data.size() <<"]";
+        << ",DataSize:" << packet.data.size() <<", VideoFrameType:"
+        << packet.videoFrameType <<"]";
 
     return  os;
 }

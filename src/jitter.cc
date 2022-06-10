@@ -62,6 +62,10 @@ void Jitter::recordMetric(MeasurementType measurement_type,
         {"clientID", clientID},
         {"sourceID", sourceID}};
 
+    logger->info << "jitter:recordMetrics: metric:[" << measurement_name.at(measurement_type)
+        << "], ClientId:[" << clientID << "], SourceId:[" << sourceID <<"]"
+        << std::flush;
+
     // fields common for most of the metrics
     auto fields = Metrics::Measurement::Fields{{"count", 1}};
 
@@ -114,13 +118,17 @@ void Jitter::recordMetrics(MetaQueue &q,
 
         if (measurement != nullptr)
         {
-            measurement->set(std::chrono::system_clock::now(),
-                             q.getMetricFields(type));
+            try {
+                measurement->set(std::chrono::system_clock::now(),
+                                 q.getMetricFields(type));
+            } catch (std::exception & e) {
+                logger->warning << "metrics exception, ignore" << std::flush;
+            }
+
+
         }
     }
 }
-
-
 
 bool Jitter::push(PacketPointer raw_packet)
 {
@@ -252,16 +260,21 @@ PacketPointer Jitter::popAudio(uint64_t sourceID,
     PacketPointer packet = nullptr;
     bool unableToThrowSilence = false;
 
-    if (idle_client) idle_client = false;
+    if (idle_client) {
+        idle_client = false;
+    }
 
     if (sourceID != audio.sourceID)
     {
         logger->warning << "SrcID?" << sourceID
                         << " Audio source id:" << audio.sourceID << std::flush;
-        return packet;
+        return nullptr;
     }
 
-    logger->debug << "[J-PopAudio: Q-depth:" << audio.getMsInQueue() << "]" << std::flush;
+    logger->info << "[J-PopAudio: Q-depth:" << audio.getMsInQueue() << "]" << std::flush;
+    logger->info << "[J-PopAudio: Jitter-ms:" << audio_jitter.getJitterMs() << "]" << std::flush;
+    logger->info << "[J-PopAudio: Asking Length:" << length << "]" << std::flush;
+    logger->info << "[J-PopAudio: Playing total in buffers" << audio.playout.getTotalInBuffers() << "]" << std::flush;
 
     QueueMonitor(now);
     int num_depth_adjustments = 1;
@@ -275,11 +288,12 @@ PacketPointer Jitter::popAudio(uint64_t sourceID,
             // we don't have anything in our buffers, create PLC
             packet = audio.createPLC(audio.getFrameSize());
             packet->sourceRecordTime = 0;
-            logger->debug << "F" << std::flush;
+            logger->info << "F-plc" << std::flush;
         }
         else
         {
             double src_ratio = bucket.getSrcRatio();
+            logger->info << "src_ratio:" << src_ratio << std::flush;
             if (num_depth_adjustments > 0 && src_ratio > 1.0)
             {
                 // insert silence if we need to make
@@ -289,7 +303,7 @@ PacketPointer Jitter::popAudio(uint64_t sourceID,
                     // talk spurt)
                     packet = audio.createPLC(audio.getFrameSize());
                     packet->sourceRecordTime = 0;
-                    logger->debug << "F" << std::flush;
+                    logger->info << "F-plc-silence" << std::flush;
                     --num_depth_adjustments;
                     bucket.adjustQueueDepthTrackerDiscardedPackets(1);
                 }
@@ -310,7 +324,7 @@ PacketPointer Jitter::popAudio(uint64_t sourceID,
                     bucket.emptyBucket(now);
                     packet = audio.createPLC(audio.getFrameSize());
                     packet->sourceRecordTime = 0;
-                    logger->debug << "F" << std::flush;
+                    logger->debug << "F-plc-empty" << std::flush;
                 }
                 else
                 {
@@ -332,8 +346,7 @@ PacketPointer Jitter::popAudio(uint64_t sourceID,
                         sync.audio_popped(packet->sourceRecordTime,
                                           packet->encodedSequenceNum,
                                           now);
-                        if (packet->encodedSequenceNum % 100 == 0)
-                            logger->debug << "[A:" << packet->encodedSequenceNum
+                            logger->info << "[A:" << packet->encodedSequenceNum
                                           << "]" << std::flush;
                     }
                 }
@@ -370,7 +383,8 @@ PacketPointer Jitter::popAudio(uint64_t sourceID,
     audio.playout.fill(packet->data, length, timestamp);
     packet->encodedSequenceNum = sync.audio_seq_popped;
     packet->sourceRecordTime = timestamp;
-    logger->debug << "[QA: " << audio.mq.size() << "]" << std::flush;
+    logger->info << "PopAudio-final- encoded-seq-no" << packet->encodedSequenceNum << std::flush;
+    logger->info << "[QA: " << audio.mq.size() << "]" << std::flush;
     return packet;
 }
 
@@ -483,10 +497,12 @@ int Jitter::popVideo(uint64_t sourceID,
         return len;
     }
 
-    logger->debug << "[Jitter: popVideo: queue has: "
+    logger->info << "[Jitter: popVideo: queue has: "
                  << video.mq.size() << " ]" << std::flush;
 
-    if (idle_client) idle_client = false;
+    if (idle_client) {
+        idle_client = false;
+    }
 
     if (video.mq.empty())
     {

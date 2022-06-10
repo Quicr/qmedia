@@ -76,7 +76,6 @@ uint64_t MetaQueue::getNextSourceTime()
 
 Metrics::Measurement::Fields MetaQueue::getMetricFields(media_type media_type)
 {
-    return {};
     if (!media_name.count(media_type))
     {
         std::clog << "media_type entries not found:" << type << std::endl;

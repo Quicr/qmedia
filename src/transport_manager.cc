@@ -318,6 +318,8 @@ void TransportManager::recordMetric(MeasurementType mtype,
         {MeasurementType::FrameRate_Rx, "RxFrameCount"},
         {MeasurementType::QDepth_Tx, "TxQueueDepth"},
         {MeasurementType::QDepth_Rx, "RxQueueDepth"},
+        {MeasurementType::FrameCaptureToTransmitDelay, "FrameCaptureToTxDelay"},
+        {MeasurementType::FrameCaptureInterval, "FrameCaptureInterval"}
     };
 
     if (!metrics)
@@ -361,6 +363,65 @@ void TransportManager::recordMetric(MeasurementType mtype,
             }
             tags.push_back({"media_type", (uint64_t) packetPointer->mediaType});
             fields.push_back({"packet_size", packetPointer->data.size()});
+            auto entry = Metrics::Measurement::TimeEntry{std::move(tags),
+                                                         std::move(fields)};
+            measurements[mtype]->set_time_entry(now, std::move(entry));
+            num_metrics_accumulated++;
+        }
+        break;
+        case MeasurementType::FrameRate_Tx:
+        case MeasurementType::FrameRate_Rx:
+        {
+            if (!measurements.count(mtype))
+            {
+                logger->info << "Creating Measurement: " << measurement_name.at(mtype) << std::flush;
+                measurements[mtype] = metrics->createMeasurement(
+                    measurement_name.at(mtype), {});
+            }
+            tags.push_back({"media_type", (uint64_t) packetPointer->mediaType});
+            fields.push_back({"packet_size", packetPointer->data.size()});
+            auto entry = Metrics::Measurement::TimeEntry{std::move(tags),
+                                                         std::move(fields)};
+            measurements[mtype]->set_time_entry(now, std::move(entry));
+            num_metrics_accumulated++;
+        }
+        break;
+        case MeasurementType::FrameCaptureToTransmitDelay:
+        {
+            if (!measurements.count(mtype))
+            {
+                logger->info << "Creating Measurement: " << measurement_name.at(mtype) << std::flush;
+                measurements[mtype] = metrics->createMeasurement(
+                    measurement_name.at(mtype), {});
+            }
+
+            tags.push_back({"media_type", (uint64_t) packetPointer->mediaType});
+            auto diff = packetPointer->frameCaptureToTransmitDelay.end - packetPointer->frameCaptureToTransmitDelay.start;
+            logger->info << "Metric:FrameCaptureToTransmitDelay: start:"
+                         << packetPointer->frameCaptureToTransmitDelay.start
+                         << ", End:" << packetPointer->frameCaptureToTransmitDelay.end
+                         << ", Diff:" << diff << std::flush;
+
+            fields.push_back({"duration", diff});
+            auto entry = Metrics::Measurement::TimeEntry{std::move(tags),
+                                                         std::move(fields)};
+            measurements[mtype]->set_time_entry(now, std::move(entry));
+            num_metrics_accumulated++;
+        }
+        break;
+        case MeasurementType::FrameCaptureInterval:
+        {
+            if (!measurements.count(mtype))
+            {
+                logger->info << "Creating Measurement: " << measurement_name.at(mtype) << std::flush;
+                measurements[mtype] = metrics->createMeasurement(
+                    measurement_name.at(mtype), {});
+            }
+
+            tags.push_back({"media_type", (uint64_t) packetPointer->mediaType});
+            auto duration  = (packetPointer->mediaType == Packet::MediaType::Opus)
+                                ? packetPointer->audioCaptureInterval : packetPointer->videoCaputreInterval;
+            fields.push_back({"duration", duration});
             auto entry = Metrics::Measurement::TimeEntry{std::move(tags),
                                                          std::move(fields)};
             measurements[mtype]->set_time_entry(now, std::move(entry));
@@ -442,7 +503,7 @@ bool TransportManager::recvDataFromNet(
         return false;
     }
 
-    logger->debug << "[Decode Success]: "<< *packet <<  std::flush;
+    logger->info << "[Decode Success]: "<< *packet <<  std::flush;
 
 #if 0
     // decrypt if its client transportManager
@@ -575,12 +636,22 @@ bool TransportManager::getDataToSendToNet(NetTransport::Data& data) {
 
     data.source_id = packet->sourceID;
     data.peer.addrLen = packet->peer_info.addrLen;
-    memcpy(
-        &data.peer.addr, &(packet->peer_info.addr), packet->peer_info.addrLen);
+
+    memcpy(&data.peer.addr,
+           &(packet->peer_info.addr),
+           packet->peer_info.addrLen);
 
     logger->debug << "[S]:" << *packet << std::flush;
-
     data.data = std::move(packet->encoded_data);
+
+    // add some measurements
+    auto now = std::chrono::system_clock::now();
+    auto now_ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
+    logger->info << "End EncodedMs:" << now_ms << std::flush;
+    packet->frameCaptureToTransmitDelay.end = now_ms;
+    recordMetric(MeasurementType::FrameRate_Tx, packet);
+    recordMetric(MeasurementType::FrameCaptureToTransmitDelay, packet);
+    recordMetric(MeasurementType::FrameCaptureInterval, packet);
 
     return true;
 }

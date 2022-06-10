@@ -149,6 +149,8 @@ public:
         FrameRate_Rx,
         QDepth_Tx,
         QDepth_Rx,
+        FrameCaptureToTransmitDelay,
+        FrameCaptureInterval,
     };
     std::map<MeasurementType, Metrics::MeasurementPtr> measurements;
     void recordMetric(MeasurementType, const PacketPointer &packetPointer);

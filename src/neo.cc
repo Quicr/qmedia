@@ -278,6 +278,7 @@ void Neo::sendVideoFrame(const char *buffer,
     if (video_encoder == nullptr) {
         log->debug << "Video Encoder, unavailable" << std::flush;
     }
+    static uint64_t  start = 0;
     // TODO:implement clone()
     // TODO: remove assert
     int sendRaw = 0;        // 1 will send Raw YUV video instead of AV1
@@ -291,6 +292,17 @@ void Neo::sendVideoFrame(const char *buffer,
     packet->sourceRecordTime = timestamp;
     packet->mediaType = sendRaw ? Packet::MediaType::Raw :
                                   Packet::MediaType::AV1;
+
+    // adding for delay from encode to reassembly in jitter
+    auto now = std::chrono::system_clock::now();
+    auto now_ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
+    if(start == 0) {
+        start = now_ms;
+    } else {
+        log->info << "SendVideoFrame Interval " << (now_ms - start) << std::flush;
+        start = now_ms;
+    }
+
     // encode and packetize
     encodeVideoFrame(buffer,
                      length,
@@ -308,6 +320,7 @@ void Neo::sendVideoFrame(const char *buffer,
         // encoder skipped this frame, nothing to send
         return;
     }
+
     video_seq_no++;
 
     if (loopbackMode == LoopbackMode::codec)
@@ -317,12 +330,21 @@ void Neo::sendVideoFrame(const char *buffer,
     }
 
     // adding for delay from encode to reassembly in jitter
-    auto now = std::chrono::system_clock::now();
-    auto now_ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
-    log->debug << "Encoded " << packet->encodedSequenceNum
-              << " FrameType: " <<( int) packet->videoFrameType << std::flush;
-
+    auto now_2 = std::chrono::system_clock::now();
+    auto now_ms_2 = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
+    log->info << "Capture2Encode: Duration:" << (now_ms_2 - now_ms) << std::flush;
     packet->frameEncodeTime = now_ms;
+    packet->frameCaptureToTransmitDelay.start = now_ms;
+    packet->videoCaputreInterval = 0;
+    if(last_video_capture_time == 0) {
+        last_video_capture_time = now_ms;
+    } else {
+        packet->videoCaputreInterval = now_ms - last_video_capture_time;
+        last_video_capture_time = now_ms;
+    }
+
+
+
     if (transport_type == NetTransport::Type::QUICR) {
         // quicr transport handles its own fragmentation and reassemble
         log->debug << "SendVideoFrame: Sending full object:"
@@ -548,6 +570,14 @@ void Neo::audioEncoderCallback(PacketPointer packet)
     auto now = std::chrono::system_clock::now();
     auto now_ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
     packet->frameEncodeTime = now_ms;
+    packet->frameCaptureToTransmitDelay.start = now_ms;
+    packet->audioCaptureInterval = 0;
+    if(last_audio_capture_time == 0) {
+        last_audio_capture_time = now_ms;
+    } else {
+        packet->audioCaptureInterval = now_ms - last_audio_capture_time;
+        last_audio_capture_time = now_ms;
+    }
 
     // this seems to be incomplete, we need media timeline driven
     // seq_no and may be also the media packet sequence number

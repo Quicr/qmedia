@@ -116,7 +116,7 @@ int main(int argc, char *argv[])
     {
         std::cout << "Transport is QuicR\n";
         transportManager = new ClientTransportManager(
-            neo_media::NetTransport::QUICR, "127.0.0.1", 7777, nullptr, logger);
+            neo_media::NetTransport::QUICR, "127.0.0.1", 8888, nullptr, logger);
         transportManager->start();
     }
     else

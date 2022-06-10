@@ -22,6 +22,13 @@ class Packet;
 
 using PacketPointer = std::unique_ptr<Packet>;
 
+// helpful metrics
+struct DelayPoint
+{
+    uint64_t start;
+    uint64_t end;
+};
+
 class Packet
 {
 public:
@@ -119,6 +126,12 @@ public:
     bool discardable_frame = false;
     uint8_t temporalLayerId;
     uint8_t spatialLayerId;
+
+    // metric helps
+    DelayPoint frameCaptureToTransmitDelay;
+    DelayPoint frameReceiveToRenderDelay;
+    uint64_t  audioCaptureInterval = 0;
+    uint64_t videoCaputreInterval = 0;
 };
 
 std::ostream &operator<<(std::ostream &os, const Packet::Type &pktType);

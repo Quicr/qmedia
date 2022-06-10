@@ -32,8 +32,11 @@ Sync::sync_action Sync::getVideoAction(unsigned int audio_pop_delay,
 
     for (const auto &frame : mq.Q)
     {
-        logger->debug << "[sync:videoAction num_pop:" << num_pop
+        logger->info << "[sync:videoAction num_pop:" << num_pop
                      << ", video_seq_popped:" << video_seq_popped << "]" << std::flush;
+        logger->info << "[sync:frame->packet->encodedSequenceNum:"
+                     << frame->packet->encodedSequenceNum << std::flush;
+
         if(frame->packet != nullptr) {
             logger->debug << "\t " << *frame->packet << std::flush;
         }
@@ -66,7 +69,7 @@ Sync::sync_action Sync::getVideoAction(unsigned int audio_pop_delay,
         else if (frame->packet->encodedSequenceNum ==
                  (video_seq_popped + num_pop + 1))
         {
-            logger->debug << "[sync:videoAction: processing frames in order ]" << std::flush;
+            logger->info << "[sync:videoAction: processing frames in order ]" << std::flush;
             // video only action
             if (source_audio_time_popped == 0)
             {
@@ -79,7 +82,7 @@ Sync::sync_action Sync::getVideoAction(unsigned int audio_pop_delay,
                 // pop (another) older frame
                 action = sync_action::pop;
                 ++num_pop;
-                logger->debug << "[sync:videoAction popping older frame: num_pop:"
+                logger->info << "[sync:videoAction popping older frame: num_pop:"
                              << num_pop << "]" << std::flush;
             }
             // audio stopped popping or stopped receiving requires independent
@@ -90,11 +93,11 @@ Sync::sync_action Sync::getVideoAction(unsigned int audio_pop_delay,
             {
                 action = sync_action::pop_video_only;
                 ++num_pop;
-                logger->debug << "[sync:videoAction audio pop stopped > 400ms" << std::flush;
+                logger->info << "[sync:videoAction audio pop stopped > 400ms" << std::flush;
                 break;        // only single pop for video only
             }
             else {
-                logger->debug << "[sync:videoAction, returning default action:" << action << std::flush;
+                logger->info << "[sync:videoAction, returning default action:" << action << std::flush;
                 return action;  // hard exit - we have frames in order.
                                 // return either previous pop or default
                                  // hold
@@ -105,9 +108,10 @@ Sync::sync_action Sync::getVideoAction(unsigned int audio_pop_delay,
         // video out of order - discard until IDR is found - or return IDR
         else
         {
-            logger->debug << "[sync:videoAction processing out of order frame: action"
+            logger->info << "[sync:videoAction processing out of order frame: action"
                 << (int) action << "]" << std::flush;
             if (action == pop)   {
+                logger->info << "sync:videoAction:OOO: action==pop" << std::flush;
                 break;
             }     // if we find out-of-order deeper in the queue - wait
 
@@ -115,7 +119,8 @@ Sync::sync_action Sync::getVideoAction(unsigned int audio_pop_delay,
             // discardable (acceptable) loss
             if (frame->packet->videoFrameType != Packet::VideoFrameType::Idr)
             {
-                logger->debug << "[sync:videoAction discarding, not IDR" << std::flush;
+                logger->info << "[sync:videoAction discarding, not IDR"
+                             << (int) frame->packet->videoFrameType << std::flush;
                 action = pop_discard;
                 ++num_pop;
             }
@@ -125,7 +130,7 @@ Sync::sync_action Sync::getVideoAction(unsigned int audio_pop_delay,
                 {
                     action = pop;
                     ++num_pop;
-                    logger->debug << "[sync:videoAction setting action to pop, num_pop"
+                    logger->info << "[sync:videoAction setting action to pop, num_pop"
                                  << num_pop << "]" << std::flush;
                 }
                 break;

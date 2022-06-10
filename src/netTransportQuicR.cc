@@ -466,10 +466,14 @@ int quicrq_app_loop_cb(picoquic_quic_t *quic,
     NetTransport::Data send_packet;
     auto got = cb_ctx->transportManager->getDataToSendToNet(send_packet);
     if (!got || send_packet.empty()) {
-        return false;
+        return ret;
     }
 
     // extract the source context
+    if (send_packet.source_id == 0) {
+        logger->warning << "Send packet has 0 sourceId" << std::flush;
+        return ret;
+    }
     auto& publish_ctx = cb_ctx->transport->get_publisher_context(send_packet.source_id);
     logger->debug << "[loop] doSends: source_id:" << send_packet.source_id << std::flush;
     assert(publish_ctx.object_source_ctx);

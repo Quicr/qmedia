@@ -204,6 +204,8 @@ private:
     LoopbackMode loopbackMode = LoopbackMode::none;
     Metrics::MetricsPtr metrics = nullptr;
     NetTransport::Type transport_type;
+    uint64_t last_audio_capture_time = 0;
+    uint64_t last_video_capture_time = 0;
 };        // class Neo
 
 typedef std::shared_ptr<Neo> NeoPointer;
