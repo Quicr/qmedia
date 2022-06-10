@@ -451,49 +451,44 @@ int quicrq_app_loop_cb(picoquic_quic_t *quic,
             case picoquic_packet_loop_port_update:
                 break;
             case picoquic_packet_loop_time_check:
+            {
                 /* check local test sources */
                 quicrq_app_check_source_time(
                     cb_ctx, (packet_loop_time_check_arg_t *) callback_arg);
-                break;
+                // check if there are any data to be sent
+#if defined(USE_OBJECT_API)
+                NetTransport::Data send_packet;
+                auto got = cb_ctx->transportManager->getDataToSendToNet(
+                    send_packet);
+                if (!got || send_packet.empty())
+                {
+                    break;
+                }
+
+                // extract the source context
+                if (send_packet.source_id == 0)
+                {
+                    logger->warning << "Send packet has 0 sourceId"
+                                    << std::flush;
+                    break;
+                }
+                auto &publish_ctx = cb_ctx->transport->get_publisher_context(
+                    send_packet.source_id);
+                assert(publish_ctx.object_source_ctx);
+                ret = quicrq_publish_object(
+                    publish_ctx.object_source_ctx,
+                    reinterpret_cast<uint8_t *>(send_packet.data.data()),
+                    send_packet.data.size(),
+                    nullptr);
+                assert(ret == 0);
+            }
+                    break;
             default:
                 ret = PICOQUIC_ERROR_UNEXPECTED_ERROR;
                 break;
         }
     }
 
-    // check if there are any data to be sent
-#if defined(USE_OBJECT_API)
-    NetTransport::Data send_packet;
-    auto got = cb_ctx->transportManager->getDataToSendToNet(send_packet);
-    if (!got || send_packet.empty()) {
-        return ret;
-    }
-
-    // extract the source context
-    if (send_packet.source_id == 0) {
-        logger->warning << "Send packet has 0 sourceId" << std::flush;
-        return ret;
-    }
-    auto& publish_ctx = cb_ctx->transport->get_publisher_context(send_packet.source_id);
-    logger->debug << "[loop] doSends: source_id:" << send_packet.source_id << std::flush;
-    assert(publish_ctx.object_source_ctx);
-    logger->debug << "doSends: Copied data to the quicr transport:" << send_packet.data.size()
-                 <<  ", for source: " << publish_ctx.url <<std::flush;
-
-    ret = quicrq_publish_object(publish_ctx.object_source_ctx,
-                                     reinterpret_cast<uint8_t *>(send_packet.data.data()),
-                                     send_packet.data.size(),
-                                     nullptr);
-    assert(ret == 0);
-
-    ret = quicrq_cnx_post_media(
-        cb_ctx->cn_ctx,
-        reinterpret_cast<uint8_t *>(const_cast<char *>(publish_ctx.url.data())),
-        publish_ctx.url.length(),
-        true);
-
-    assert(ret == 0);
-#endif
 
     return ret;
 }
@@ -579,6 +574,13 @@ void NetTransportQUICR::publish(uint64_t source_id,
                                                         nullptr);
     assert(obj_src_context);
     pub_context->object_source_ctx = obj_src_context;
+    // enable publishing
+    auto ret = quicrq_cnx_post_media(
+        cnx_ctx,
+        reinterpret_cast<uint8_t *>(const_cast<char *>(url.data())),
+        url.length(),
+        true);
+    assert(ret == 0);
 #else
     quicrq_media_source_ctx_t *src_ctx = nullptr;
     src_ctx = quicrq_publish_source(

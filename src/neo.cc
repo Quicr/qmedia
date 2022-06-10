@@ -278,7 +278,6 @@ void Neo::sendVideoFrame(const char *buffer,
     if (video_encoder == nullptr) {
         log->debug << "Video Encoder, unavailable" << std::flush;
     }
-    static uint64_t  start = 0;
     // TODO:implement clone()
     // TODO: remove assert
     int sendRaw = 0;        // 1 will send Raw YUV video instead of AV1
@@ -296,12 +295,6 @@ void Neo::sendVideoFrame(const char *buffer,
     // adding for delay from encode to reassembly in jitter
     auto now = std::chrono::system_clock::now();
     auto now_ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
-    if(start == 0) {
-        start = now_ms;
-    } else {
-        log->info << "SendVideoFrame Interval " << (now_ms - start) << std::flush;
-        start = now_ms;
-    }
 
     // encode and packetize
     encodeVideoFrame(buffer,
@@ -330,9 +323,6 @@ void Neo::sendVideoFrame(const char *buffer,
     }
 
     // adding for delay from encode to reassembly in jitter
-    auto now_2 = std::chrono::system_clock::now();
-    auto now_ms_2 = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
-    log->info << "Capture2Encode: Duration:" << (now_ms_2 - now_ms) << std::flush;
     packet->frameEncodeTime = now_ms;
     packet->frameCaptureToTransmitDelay.start = now_ms;
     packet->videoCaputreInterval = 0;
@@ -342,8 +332,6 @@ void Neo::sendVideoFrame(const char *buffer,
         packet->videoCaputreInterval = now_ms - last_video_capture_time;
         last_video_capture_time = now_ms;
     }
-
-
 
     if (transport_type == NetTransport::Type::QUICR) {
         // quicr transport handles its own fragmentation and reassemble
