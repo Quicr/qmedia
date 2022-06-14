@@ -22,7 +22,7 @@
 #include <ws2tcpip.h>
 #endif
 
-#include "netTransportQuic.hh"
+#include "netTransportQuicR.hh"
 #include "transport_manager.hh"
 
 #include "picoquic.h"
@@ -135,10 +135,10 @@ void quicrq_app_check_source_time(TransportContext *cb_ctx,
         // log delta
         return;
     }
-    else if (time_check_arg->delta_t > 1000)
+    else if (time_check_arg->delta_t > 5000)
     {
         // is this a good choice?
-        time_check_arg->delta_t = 1000;
+        time_check_arg->delta_t = 5000;
     }
     // log here delta
 }
@@ -353,7 +353,8 @@ int object_stream_consumer_fn(
 
     auto cons_ctx = (ConsumerContext *) object_consumer_ctx;
     auto& logger = cons_ctx->transport->logger;
-    //logger->info << cons_ctx->url << ": object_stream_consumer_fn: action:" << (int) action << std::flush;
+    logger->info << cons_ctx->url << ": object_stream_consumer_fn: action:"
+                 << (int) action << ",data_length:" << data_length<< std::flush;
     int ret = 0;
     switch (action) {
         case quicrq_media_datagram_ready:
@@ -401,19 +402,18 @@ int quicrq_app_loop_cb(picoquic_quic_t *quic,
     auto *cb_ctx = (TransportContext *) callback_ctx;
     auto& logger = cb_ctx->transport->logger;
 
-    if (cb_ctx == NULL)
+    if (cb_ctx == nullptr)
     {
-        ret = PICOQUIC_ERROR_UNEXPECTED_ERROR;
+        return PICOQUIC_ERROR_UNEXPECTED_ERROR;
     }
     else
     {
         switch (cb_mode)
         {
             case picoquic_packet_loop_ready:
-                if (callback_arg != NULL)
+                if (callback_arg != nullptr)
                 {
-                    picoquic_packet_loop_options_t *options =
-                        (picoquic_packet_loop_options_t *) callback_arg;
+                    auto *options = (picoquic_packet_loop_options_t *) callback_arg;
                     options->do_time_check = 1;
                 }
                 if (cb_ctx->transport)
@@ -458,29 +458,35 @@ int quicrq_app_loop_cb(picoquic_quic_t *quic,
                 // check if there are any data to be sent
 #if defined(USE_OBJECT_API)
                 NetTransport::Data send_packet;
-                auto got = cb_ctx->transportManager->getDataToSendToNet(
-                    send_packet);
-                if (!got || send_packet.empty())
+                auto num_sent = 0;
+                while(cb_ctx->transportManager->getDataToSendToNet(send_packet))
                 {
-                    break;
+                    if (send_packet.empty())
+                    {
+                        continue;
+                    }
+
+                    // extract the source context
+                    if (send_packet.source_id == 0)
+                    {
+                        logger->warning << "Send packet has 0 sourceId"
+                                        << std::flush;
+                        continue ;
+                    }
+                    auto &publish_ctx = cb_ctx->transport->get_publisher_context(
+                        send_packet.source_id);
+                    assert(publish_ctx.object_source_ctx);
+                    ret = quicrq_publish_object(
+                        publish_ctx.object_source_ctx,
+                        reinterpret_cast<uint8_t *>(send_packet.data.data()),
+                        send_packet.data.size(),
+                        nullptr);
+                    assert(ret == 0);
+                    send_packet.data.clear();
+                    num_sent++;
                 }
 
-                // extract the source context
-                if (send_packet.source_id == 0)
-                {
-                    logger->warning << "Send packet has 0 sourceId"
-                                    << std::flush;
-                    break;
-                }
-                auto &publish_ctx = cb_ctx->transport->get_publisher_context(
-                    send_packet.source_id);
-                assert(publish_ctx.object_source_ctx);
-                ret = quicrq_publish_object(
-                    publish_ctx.object_source_ctx,
-                    reinterpret_cast<uint8_t *>(send_packet.data.data()),
-                    send_packet.data.size(),
-                    nullptr);
-                assert(ret == 0);
+#endif
             }
                     break;
             default:
@@ -575,7 +581,7 @@ void NetTransportQUICR::publish(uint64_t source_id,
     assert(obj_src_context);
     pub_context->object_source_ctx = obj_src_context;
     // enable publishing
-    auto ret = quicrq_cnx_post_media(
+        auto ret = quicrq_cnx_post_media(
         cnx_ctx,
         reinterpret_cast<uint8_t *>(const_cast<char *>(url.data())),
         url.length(),

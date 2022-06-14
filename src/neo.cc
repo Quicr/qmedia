@@ -292,9 +292,16 @@ void Neo::sendVideoFrame(const char *buffer,
     packet->mediaType = sendRaw ? Packet::MediaType::Raw :
                                   Packet::MediaType::AV1;
 
-    // adding for delay from encode to reassembly in jitter
     auto now = std::chrono::system_clock::now();
     auto now_ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
+
+    packet->videoCaputreInterval = 0;
+    if(last_video_capture_time == 0) {
+        last_video_capture_time = now_ms;
+    } else {
+        packet->videoCaputreInterval = now_ms - last_video_capture_time;
+        last_video_capture_time = now_ms;
+    }
 
     // encode and packetize
     encodeVideoFrame(buffer,
@@ -314,6 +321,16 @@ void Neo::sendVideoFrame(const char *buffer,
         return;
     }
 
+
+    auto now_2 = std::chrono::system_clock::now();
+    auto now_ms_2 = std::chrono::duration_cast<std::chrono::milliseconds>(now_2.time_since_epoch()).count();
+
+    log->info << "EncodeTime: now: " << now_ms_2
+              << ", before: "  << now_ms
+              << " delta " << now_ms_2 - now_ms
+              << " CaptureDelta: " << packet->videoCaputreInterval
+              << std::flush;
+
     video_seq_no++;
 
     if (loopbackMode == LoopbackMode::codec)
@@ -325,13 +342,6 @@ void Neo::sendVideoFrame(const char *buffer,
     // adding for delay from encode to reassembly in jitter
     packet->frameEncodeTime = now_ms;
     packet->frameCaptureToTransmitDelay.start = now_ms;
-    packet->videoCaputreInterval = 0;
-    if(last_video_capture_time == 0) {
-        last_video_capture_time = now_ms;
-    } else {
-        packet->videoCaputreInterval = now_ms - last_video_capture_time;
-        last_video_capture_time = now_ms;
-    }
 
     if (transport_type == NetTransport::Type::QUICR) {
         // quicr transport handles its own fragmentation and reassemble

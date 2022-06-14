@@ -225,6 +225,7 @@ void ClientTransportManager::send(PacketPointer packet)
         return;
     }
 
+
     {
         std::lock_guard<std::mutex> lock(sendQMutex);
         sendQ.push_back(std::move(packet));
@@ -319,6 +320,7 @@ void TransportManager::recordMetric(MeasurementType mtype,
         {MeasurementType::QDepth_Tx, "TxQueueDepth"},
         {MeasurementType::QDepth_Rx, "RxQueueDepth"},
         {MeasurementType::FrameCaptureToTransmitDelay, "FrameCaptureToTxDelay"},
+        {MeasurementType::FrameCaptureToTransmitDelay, "FrameCaptureToTxDelay"},
         {MeasurementType::FrameCaptureInterval, "FrameCaptureInterval"}
     };
 
@@ -397,7 +399,7 @@ void TransportManager::recordMetric(MeasurementType mtype,
 
             tags.push_back({"media_type", (uint64_t) packetPointer->mediaType});
             auto diff = packetPointer->frameCaptureToTransmitDelay.end - packetPointer->frameCaptureToTransmitDelay.start;
-            logger->info << "Metric:FrameCaptureToTransmitDelay: start:"
+            logger->debug << "Metric:FrameCaptureToTransmitDelay: start:"
                          << packetPointer->frameCaptureToTransmitDelay.start
                          << ", End:" << packetPointer->frameCaptureToTransmitDelay.end
                          << ", Diff:" << diff << std::flush;
@@ -575,7 +577,6 @@ bool TransportManager::getDataToSendToNet(Packet::MediaType media_type,
                                           NetTransport::PeerConnectionInfo *info,
                                           socklen_t *addrLen)
 {
-    logger->info << "getDataToSendToNet: asking for " << (int) media_type << std::flush;
     PacketPointer packet;
     {
         std::lock_guard<std::mutex> lock(sendQMutex);
@@ -647,7 +648,7 @@ bool TransportManager::getDataToSendToNet(NetTransport::Data& data) {
     // add some measurements
     auto now = std::chrono::system_clock::now();
     auto now_ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
-    logger->info << "End EncodedMs:" << now_ms << std::flush;
+
     packet->frameCaptureToTransmitDelay.end = now_ms;
     recordMetric(MeasurementType::FrameRate_Tx, packet);
     recordMetric(MeasurementType::FrameCaptureToTransmitDelay, packet);

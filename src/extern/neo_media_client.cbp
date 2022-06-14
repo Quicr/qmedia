@@ -5,7 +5,7 @@
 		<Option title="neo_media_client"/>
 		<Option makefile_is_custom="1"/>
 		<Option compiler="gcc"/>
-		<Option virtualFolders="CMake Files\;CMake Files\proto\;CMake Files\vcpkg_installed\;CMake Files\vcpkg_installed\x64-osx\;CMake Files\vcpkg_installed\x64-osx\share\;CMake Files\vcpkg_installed\x64-osx\share\protobuf\;CMake Files\vcpkg_installed\x64-osx\share\curl\;CMake Files\vcpkg_installed\x64-osx\share\zlib\;CMake Files\vcpkg_installed\x64-osx\share\opus\;CMake Files\vcpkg_installed\x64-osx\share\openssl\;CMake Files\vcpkg_installed\x64-osx\share\portaudio\;CMake Files\vcpkg_installed\x64-osx\share\doctest\;CMake Files\..\;CMake Files\..\media\;CMake Files\..\media\vcpkg\;CMake Files\..\media\vcpkg\scripts\;CMake Files\..\media\vcpkg\scripts\buildsystems\;CMake Files\cmake\;CMake Files\_deps\;CMake Files\_deps\sframe-src\;CMake Files\third_party\;CMake Files\third_party\tmp\;CMake Files\src\;CMake Files\src\extern\;CMake Files\cmd\;CMake Files\test\;"/>
+		<Option virtualFolders="CMake Files\;CMake Files\proto\;CMake Files\vcpkg_installed\;CMake Files\vcpkg_installed\x64-osx\;CMake Files\vcpkg_installed\x64-osx\share\;CMake Files\vcpkg_installed\x64-osx\share\protobuf\;CMake Files\vcpkg_installed\x64-osx\share\curl\;CMake Files\vcpkg_installed\x64-osx\share\zlib\;CMake Files\vcpkg_installed\x64-osx\share\opus\;CMake Files\vcpkg_installed\x64-osx\share\openssl\;CMake Files\vcpkg_installed\x64-osx\share\doctest\;CMake Files\..\;CMake Files\..\media\;CMake Files\..\media\vcpkg\;CMake Files\..\media\vcpkg\scripts\;CMake Files\..\media\vcpkg\scripts\buildsystems\;CMake Files\cmake\;CMake Files\_deps\;CMake Files\_deps\sframe-src\;CMake Files\third_party\;CMake Files\third_party\tmp\;CMake Files\src\;CMake Files\src\extern\;CMake Files\cmd\;CMake Files\test\;"/>
 		<Build>
 			<Target title="all">
 				<Option working_dir="/Users/snandaku/repos/work/new-media/qmedia/src/extern"/>
@@ -139,21 +139,6 @@
 		</Unit>
 		<Unit filename="/Users/snandaku/repos/work/new-media/qmedia/vcpkg_installed/x64-osx/share/openssl/vcpkg-cmake-wrapper.cmake">
 			<Option virtualFolder="CMake Files\vcpkg_installed\x64-osx\share\openssl\"/>
-		</Unit>
-		<Unit filename="/Users/snandaku/repos/work/new-media/qmedia/vcpkg_installed/x64-osx/share/portaudio/portaudioConfig.cmake">
-			<Option virtualFolder="CMake Files\vcpkg_installed\x64-osx\share\portaudio\"/>
-		</Unit>
-		<Unit filename="/Users/snandaku/repos/work/new-media/qmedia/vcpkg_installed/x64-osx/share/portaudio/portaudioConfigVersion.cmake">
-			<Option virtualFolder="CMake Files\vcpkg_installed\x64-osx\share\portaudio\"/>
-		</Unit>
-		<Unit filename="/Users/snandaku/repos/work/new-media/qmedia/vcpkg_installed/x64-osx/share/portaudio/portaudioTargets-debug.cmake">
-			<Option virtualFolder="CMake Files\vcpkg_installed\x64-osx\share\portaudio\"/>
-		</Unit>
-		<Unit filename="/Users/snandaku/repos/work/new-media/qmedia/vcpkg_installed/x64-osx/share/portaudio/portaudioTargets-release.cmake">
-			<Option virtualFolder="CMake Files\vcpkg_installed\x64-osx\share\portaudio\"/>
-		</Unit>
-		<Unit filename="/Users/snandaku/repos/work/new-media/qmedia/vcpkg_installed/x64-osx/share/portaudio/portaudioTargets.cmake">
-			<Option virtualFolder="CMake Files\vcpkg_installed\x64-osx\share\portaudio\"/>
 		</Unit>
 		<Unit filename="/Users/snandaku/repos/work/new-media/qmedia/vcpkg_installed/x64-osx/share/doctest/doctest.cmake">
 			<Option virtualFolder="CMake Files\vcpkg_installed\x64-osx\share\doctest\"/>
