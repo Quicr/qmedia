@@ -63,7 +63,7 @@ H264Encoder::H264Encoder(unsigned int video_max_width,
     encParmExt.sSpatialLayers[0].sSliceArgument.uiSliceMode = SM_SINGLE_SLICE;
     encParmExt.sSpatialLayers[0].sSliceArgument.uiSliceSizeConstraint = 1300;
     encParmExt.sSpatialLayers[0].iDLayerQp = 24;
-    encParmExt.iMultipleThreadIdc = 1;           // multi-threading not tested for mode SM_SIZELIMITED_SLICE
+    //encParmExt.iMultipleThreadIdc = 1;           // multi-threading not tested for mode SM_SIZELIMITED_SLICE
     encParmExt.uiMaxNalSize = 1300;   // max NAL size must fit in MTU limit
 
     rv = encoder->InitializeExt(&encParmExt);
@@ -88,6 +88,8 @@ H264Encoder::H264Encoder(unsigned int video_max_width,
     inputFrame.iStride[0] = inputFrame.iPicWidth;
     inputFrame.iStride[1] = inputFrame.iStride[2] = inputFrame.iPicWidth >> 1;
 
+    logger->info << "H264Encoder Created: w:" << video_max_width
+                 << ",h:" << video_max_height << std::flush;
 }
 
 H264Encoder::~H264Encoder()
