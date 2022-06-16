@@ -513,6 +513,7 @@ int Jitter::popVideo(uint64_t sourceID,
         return len;
     }
 
+    std::lock_guard<std::mutex> lock(video.mq.qMutex);
     switch (sync.getVideoAction(audio.fps.getAveragePopDelay(),
                                 video.fps.getAveragePopDelay(),
                                 video.mq,

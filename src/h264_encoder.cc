@@ -41,9 +41,7 @@ H264Encoder::H264Encoder(unsigned int video_max_width,
     encoder->SetOption(ENCODER_OPTION_TRACE_LEVEL, &logLevel);
 
 
-    // ./h264enc -org your_input_I420.yuv -numl 1 numtl 1
-    // -sw 1280 -sh 720 -dw 0 1280 -dh 0 720 -frin 30 -frout 0 30
-    // -rc -1 -lqp 0 24 -bf test.264
+    // ./h264enc -org your_input_I420.yuv -numl 1 numtl 1 -sw 1280 -sh 720 -dw 0 1280 -dh 0 720 -frin 30 -frout 0 30 -rc -1 -lqp 0 24 -utype 0 -iper 128 -nalSize 1300 -complexity 1 -denoise -1 -bf test.264
     rv = encoder->GetDefaultParams(&encParmExt);
     assert(rv == cmResultSuccess);
 
@@ -52,7 +50,7 @@ H264Encoder::H264Encoder(unsigned int video_max_width,
     encParmExt.iPicHeight = video_max_height;
     encParmExt.iTargetBitrate = video_max_bitrate;
     encParmExt.fMaxFrameRate = 30;
-    encParmExt.bEnableDenoise = false;
+    encParmExt.iDenoiseMode = DENOISE_OFF_MODE;
     encParmExt.iRCMode = RC_OFF_MODE;
     encParmExt.iComplexityMode = MEDIUM_COMPLEXITY;
 
@@ -62,13 +60,11 @@ H264Encoder::H264Encoder(unsigned int video_max_width,
     encParmExt.sSpatialLayers[0].iVideoHeight = video_max_height;
     encParmExt.sSpatialLayers[0].fFrameRate = 30;
     encParmExt.sSpatialLayers[0].iSpatialBitrate = video_max_bitrate;
-    encParmExt.sSpatialLayers[0].sSliceArgument.uiSliceMode = SM_SIZELIMITED_SLICE;  // must use this mode to specify NAL size
+    encParmExt.sSpatialLayers[0].sSliceArgument.uiSliceMode = SM_SINGLE_SLICE;
     encParmExt.sSpatialLayers[0].sSliceArgument.uiSliceSizeConstraint = 1300;
-    encParmExt.sSpatialLayers[0].iDLayerQp - 24;
-
+    encParmExt.sSpatialLayers[0].iDLayerQp = 24;
     encParmExt.iMultipleThreadIdc = 1;           // multi-threading not tested for mode SM_SIZELIMITED_SLICE
     encParmExt.uiMaxNalSize = 1300;   // max NAL size must fit in MTU limit
-
 
     rv = encoder->InitializeExt(&encParmExt);
     assert(rv == cmResultSuccess);
@@ -78,7 +74,7 @@ H264Encoder::H264Encoder(unsigned int video_max_width,
     assert(rv == cmResultSuccess);
 
     // set periodic I-frame interval
-    auto idrInterval = 128;
+    auto idrInterval = 64;
     rv = encoder->SetOption(ENCODER_OPTION_IDR_INTERVAL, &idrInterval);
     assert(rv == cmResultSuccess);
 

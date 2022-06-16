@@ -35,6 +35,7 @@
 					<Add directory="/Users/snandaku/repos/work/new-media/picoquic/loglib"/>
 					<Add directory="/Users/snandaku/repos/work/new-media/picotls/include"/>
 					<Add directory="/Users/snandaku/repos/work/new-media/qmedia"/>
+					<Add directory="/Users/snandaku/repos/work/new-media/qmedia/openh264/include"/>
 					<Add directory="/Users/snandaku/repos/work/new-media/qmedia/proto"/>
 					<Add directory="/Users/snandaku/repos/work/new-media/qmedia/third_party/src/gsl-extern/include"/>
 					<Add directory="/Users/snandaku/repos/work/new-media/qmedia/_deps/sframe-src/include"/>
@@ -66,6 +67,7 @@
 					<Add directory="/Users/snandaku/repos/work/new-media/picoquic/loglib"/>
 					<Add directory="/Users/snandaku/repos/work/new-media/picotls/include"/>
 					<Add directory="/Users/snandaku/repos/work/new-media/qmedia"/>
+					<Add directory="/Users/snandaku/repos/work/new-media/qmedia/openh264/include"/>
 					<Add directory="/Users/snandaku/repos/work/new-media/qmedia/proto"/>
 					<Add directory="/Users/snandaku/repos/work/new-media/qmedia/third_party/src/gsl-extern/include"/>
 					<Add directory="/Users/snandaku/repos/work/new-media/qmedia/_deps/sframe-src/include"/>

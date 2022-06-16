@@ -145,12 +145,13 @@ public:
     {
         PacketRate_Tx,
         PacketRate_Rx,
-        FrameRate_Tx,
+        FrameRate_Tx, // Rate at which frames are requested to be transported
         FrameRate_Rx,
         QDepth_Tx,
         QDepth_Rx,
-        FrameCaptureToTransmitDelay,
-        FrameCaptureInterval,
+        FrameCaptureToTransmitDelay, // interval between encode to ready to be transported
+        FrameCaptureInterval, // interval between successive calls to send media from the client
+        FrameCount_Tx // num frames sent per transport loop callback
     };
     std::map<MeasurementType, Metrics::MeasurementPtr> measurements;
     void recordMetric(MeasurementType, const PacketPointer &packetPointer);

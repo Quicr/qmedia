@@ -640,7 +640,7 @@ void NetTransportQUICR::subscribe(uint64_t source_id, Packet::MediaType media_ty
     consumer_media_ctx->cnx_ctx = cnx_ctx;
 #if defined(USE_OBJECT_API)
     constexpr auto use_datagram = true;
-    constexpr auto in_order = false;
+    constexpr auto in_order = true;
     consumer_media_ctx->object_consumer_ctx =
         quicrq_subscribe_object_stream(cnx_ctx,
                                        reinterpret_cast<uint8_t *>(const_cast<char *>(url.data())),

@@ -130,6 +130,7 @@ public:
     // metric helps
     DelayPoint frameCaptureToTransmitDelay;
     DelayPoint frameReceiveToRenderDelay;
+    DelayPoint frameQueueingDelay;
     uint64_t  audioCaptureInterval = 0;
     uint64_t videoCaputreInterval = 0;
 };

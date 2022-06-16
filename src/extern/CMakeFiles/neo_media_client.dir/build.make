@@ -98,11 +98,11 @@ src/extern/libneo_media_client.dylib: vcpkg_installed/x64-osx/lib/libprotobuf.a
 src/extern/libneo_media_client.dylib: _deps/sframe-build/libsframe.a
 src/extern/libneo_media_client.dylib: vcpkg_installed/x64-osx/debug/lib/libcrypto.a
 src/extern/libneo_media_client.dylib: vcpkg_installed/x64-osx/debug/lib/libsamplerate.a
-src/extern/libneo_media_client.dylib: vcpkg_installed/x64-osx/debug/lib/libopenh264.a
 src/extern/libneo_media_client.dylib: vcpkg_installed/x64-osx/lib/libcurl.a
 src/extern/libneo_media_client.dylib: vcpkg_installed/x64-osx/lib/libz.a
 src/extern/libneo_media_client.dylib: vcpkg_installed/x64-osx/debug/lib/libopus.a
 src/extern/libneo_media_client.dylib: /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX12.3.sdk/usr/lib/libm.tbd
+src/extern/libneo_media_client.dylib: vcpkg_installed/x64-osx/debug/lib/libopenh264.a
 src/extern/libneo_media_client.dylib: vcpkg_installed/x64-osx/debug/lib/libcrypto.a
 src/extern/libneo_media_client.dylib: /Users/snandaku/repos/work/new-media/quicrq/libquicrq-core.a
 src/extern/libneo_media_client.dylib: /Users/snandaku/repos/work/new-media/picoquic/libpicoquic-core.a

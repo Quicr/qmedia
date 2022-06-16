@@ -9,7 +9,6 @@
     "dav1d",
     "libsamplerate",
     "curl",
-    "openh264",
     {
       "name": "portaudio",
       "platform": "!uwp"

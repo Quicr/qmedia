@@ -34,11 +34,12 @@ Sync::sync_action Sync::getVideoAction(unsigned int audio_pop_delay,
     {
         logger->info << "[sync:videoAction num_pop:" << num_pop
                      << ", video_seq_popped:" << video_seq_popped << "]" << std::flush;
-        logger->info << "[sync:frame->packet->encodedSequenceNum:"
-                     << frame->packet->encodedSequenceNum << std::flush;
 
         if(frame->packet != nullptr) {
             logger->debug << "\t " << *frame->packet << std::flush;
+        } else {
+            logger->info << " null packet pointer" << std::flush;
+            continue;
         }
 
         // first frame - pop_discard to IDR - or pop if IDR is next
@@ -77,7 +78,7 @@ Sync::sync_action Sync::getVideoAction(unsigned int audio_pop_delay,
                 ++num_pop;
             }
             // if older than audio - pop this frame
-            else if (frame->packet->sourceRecordTime < source_audio_time_popped)
+            else if (frame->packet && frame->packet->sourceRecordTime < source_audio_time_popped)
             {
                 // pop (another) older frame
                 action = sync_action::pop;

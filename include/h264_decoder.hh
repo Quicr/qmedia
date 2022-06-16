@@ -1,7 +1,7 @@
 #pragma once
 
 #include <vector>
-#include <wels/codec_api.h>
+#include <codec_api.h>
 #include "codec.hh"
 
 namespace neo_media
