@@ -50,7 +50,7 @@ H264Encoder::H264Encoder(unsigned int video_max_width,
     encParmExt.iPicHeight = video_max_height;
     encParmExt.iTargetBitrate = video_max_bitrate;
     encParmExt.fMaxFrameRate = 30;
-    encParmExt.iDenoiseMode = DENOISE_OFF_MODE;
+    encParmExt.bEnableDenoise = 1;
     encParmExt.iRCMode = RC_OFF_MODE;
     encParmExt.iComplexityMode = MEDIUM_COMPLEXITY;
 

@@ -48,28 +48,16 @@
 #define MAX_LAYER_NUM_OF_FRAME          128
 #define MAX_NAL_UNITS_IN_LAYER          128     ///< predetermined here, adjust it later if need
 
-#define NUM_OF_RES_CANDS                10     ///<resolution enum numbers
-
 #define MAX_RTP_PAYLOAD_LEN             1000
 #define AVERAGE_RTP_PAYLOAD_LEN         800
 
-#define MAX_ROI_NUM_OF_FRAME            4       ///< max number of ROI per frames
-#define MAX_RECT_NUM_OF_FRAME           4       ///< max number of RECT per frames
-#define MAX_META_ROI_NUM_OF_FRAME       (1+255)  ///< 255:person face, 1:group 
-
-#define MAX_T0_RATIO                    9
-#define MIN_T0_RATIO                    5
-#define DEFAULT_T0_RATIO                6
 
 #define SAVED_NALUNIT_NUM_TMP           ( (MAX_SPATIAL_LAYER_NUM*MAX_QUALITY_LAYER_NUM) + 1 + MAX_SPATIAL_LAYER_NUM )  ///< SPS/PPS + SEI/SSEI + PADDING_NAL
 #define MAX_SLICES_NUM_TMP              ( ( MAX_NAL_UNITS_IN_LAYER - SAVED_NALUNIT_NUM_TMP ) / 3 )
 
 
-#define AUTO_REF_PIC_COUNT  (-1)          ///< encoder selects the number of reference frame automatically
-#define CODEC_DEFAULT_QP    (-1)          ///< if set to this, will set min/max QP according to codec logic
+#define AUTO_REF_PIC_COUNT  -1          ///< encoder selects the number of reference frame automatically
 #define UNSPECIFIED_BIT_RATE 0          ///< to do: add detail comment
-#define UNSPECIFIED_STATISTICS (-1)          ///< to do: add detail comment
-#define MAX_OPERATIONAL_POINTS       2       ///< max MAX_OPERATIONAL_POINTS other than Target BR, NOTE! increasing this number need to change NeedUpdateReferenceStrategy function!
 
 /**
  * @brief Struct of OpenH264 version
@@ -90,14 +78,14 @@ typedef enum {
   /**
   * Errors derived from bitstream parsing
   */
-  dsErrorFree           = 0x00,   ///< bit stream error-free
-  dsFramePending        = 0x01,   ///< need more throughput to generate a frame output,
-  dsRefLost             = 0x02,   ///< layer lost at reference frame with temporal id 0
-  dsBitstreamError      = 0x04,   ///< error bitstreams(maybe broken internal frame) the decoder cared
-  dsDepLayerLost        = 0x08,   ///< dependented layer is ever lost
-  dsNoParamSets         = 0x10,   ///< no parameter set NALs involved
-  dsDataErrorConcealed  = 0x20,   ///< current data error concealed specified
-  dsNotSupported        = 0x40,   ///< current data legal, but not supported by this decoder yet
+  dsErrorFree = 0x00,   ///< bit stream error-free
+  dsFramePending = 0x01,   ///< need more throughput to generate a frame output,
+  dsRefLost = 0x02,   ///< layer lost at reference frame with temporal id 0
+  dsBitstreamError = 0x04,   ///< error bitstreams(maybe broken internal frame) the decoder cared
+  dsDepLayerLost = 0x08,   ///< dependented layer is ever lost
+  dsNoParamSets = 0x10,   ///< no parameter set NALs involved
+  dsDataErrorConcealed = 0x20,   ///< current data error concealed specified
+  dsRefListNullPtrs = 0x40, ///<ref picure list contains null ptrs within uiRefCount range
 
   /**
   * Errors derived from logic level
@@ -154,22 +142,7 @@ typedef enum {
 
   ENCODER_OPTION_IS_LOSSLESS_LINK,            ///< advanced algorithmetic settings
 
-  ENCODER_OPTION_BITS_VARY_PERCENTAGE,       ///< bit vary percentage
-
-  ENCODER_OPTION_DPB_PARAMS,             ///< mari ltrf dpb params DPBParams
-  ENCODER_OPTION_CONTENT_CALLBACK,   ///< content detection callback function
-  ENCODER_OPTION_ROI_INFO,          /// < roi info. setting
-  ENCODER_OPTION_GET_LAYER_STATISTICS,   ///< read only
-
-  ENCODER_OPTION_VIDEO_CODEC_STRATEGY,   ///< set and get video codec strategy
-  ENCODER_OPTION_OPERATIONAL_POINT,      ///< set operational points, only valid under same given RC strategy
-  ENCODER_OPTION_GET_LAYER_FPS_RES_SUGGESTION,   ///< read only
-  ENCODER_OPTION_ENABLE_SEI_RECT_INFO,   ///< enable sei rect: true--enable sei rect; false--disable sei rect
-  ENCODER_OPTION_SEI_RECT_INFO,          ///< sei rect info.setting
-  ENCODER_OPTION_SEI_RECT_INFO_STREAM,        ///< get sei rect stream (only for hardware platform)
-  ENCODER_OPTION_ROI_INFO_STREAM,             ///< get sei meta stream (only for hardware platform)
-  ENCODER_OPTION_SHARPNESS_INFO,              ///< sei sharpness info.setting
-  ENCODER_OPTION_SHARPNESS_INFO_STREAM,       ///< get sei sharpness stream (only for hardware platform)
+  ENCODER_OPTION_BITS_VARY_PERCENTAGE        ///< bit vary percentage
 } ENCODER_OPTION;
 
 /**
@@ -194,12 +167,8 @@ typedef enum {
   DECODER_OPTION_LEVEL,                 ///< get current AU level info,only is used in GetOption
   DECODER_OPTION_STATISTICS_LOG_INTERVAL,///< set log output interval
   DECODER_OPTION_IS_REF_PIC,             ///< feedback current frame is ref pic or not
-  DECODER_OPTION_SHARP_INFO_CALLBACK,    ///< sharp information in SEI callback function
-  DECODER_OPTION_GET_QP_LIST,             ///< get current frame QP list
-  DECODER_OPTION_SEI_RECT_INFO,           ///< sei rect info.reading
-  DECODER_OPTION_SEI_META_INFO,            ///< sei meta info.reading
-  DECODER_OPTION_PARSER_NONVCL,             ///< only parser non-vcl
-  DECODER_OPTION_SET_PIC_RES                ///< set picture res for sei calculate
+  DECODER_OPTION_NUM_OF_FRAMES_REMAINING_IN_BUFFER,  ///< number of frames remaining in decoder buffer when pictures are required to re-ordered into display-order.
+  DECODER_OPTION_NUM_OF_THREADS,         ///< number of decoding threads. The maximum thread count is equal or less than lesser of (cpu core counts and 16).
 } DECODER_OPTION;
 
 /**
@@ -294,31 +263,6 @@ typedef struct {
 } SLTRConfig;
 
 /**
- * @brief Enumerate the type of denoise mode
- */
-typedef enum {
-  DENOISE_OFF_MODE           = -1,    ///< off
-  DENOISE_ADAPTIVE_MODE      = 0,     ///< adaptive denoise mode
-  DENOISE_WEAK_MODE          = 1,     ///< weak denoise mode(weak temporal, weak spatial)
-  DENOISE_STRONG_MODE        = 2,     ///< strong denoise mode (strong temporal, weak spatial)
-  DENOISE_VERY_STRONG_MODE   = 3,     ///< Apply (weak) spatial AND temporal on each block
-  DENOISE_SUPER_STRONG_MODE  = 4,     ///> Apply (strong) spatial AND temporal on each block
-  DENOISE_MODE_MAX = 4
-} DENOISE_MODES;
-
-/**
- * @brief Enumerate the type of noise level
- */
-typedef enum {
-  NOISE_LEVEL_NONE   = 0,          ///< no noise
-  NOISE_LEVEL_WEAK   = 1,          ///< weak noise
-  NOISE_LEVEL_STRONG = 2,          ///< strong noise
-  NOISE_LEVEL_VERY_STRONG = 3,     ///< very strong noise
-  NOISE_LEVEL_SUPER_STRONG = 4,    ///< super strong noise
-  NOISE_LEVEL_NUM,
-} NOISE_LEVEL;
-
-/**
 * @brief Enumerate the type of rate control mode
 */
 typedef enum {
@@ -409,78 +353,6 @@ typedef struct {
   uiSliceMbNum[MAX_SLICES_NUM_TMP]; ///< only used when uiSliceMode=2; when =0 means setting one MB row a slice
   unsigned int  uiSliceSizeConstraint; ///< now only used when uiSliceMode=4
 } SSliceArgument;
-
-/**
- * @brief Structure for ROI argument
- */
-typedef enum {
-    ST_ROI_FOR_RC = 0, //for rate control
-    ST_ROI_FOR_PF = 1  //for people-focus
-} ScenarioTypeEnum;
-
-typedef struct TRoiInfo {
-  unsigned int iPosX;
-  unsigned int iPosY;
-  unsigned int iROIWidth;
-  unsigned int iROIHeight;
-#ifdef __cplusplus
-  TRoiInfo() {
-    iPosX = iPosY = iROIWidth = iROIHeight = 0;
-  }
-#endif
-} SROI;
-
-typedef struct TRoiArea {
-  unsigned int iNumROI;
-  SROI* pROIArea;
-  int iVirtualBackgroundType;
-  unsigned int uiPicWidth;
-  unsigned int uiPicHeight;
-  ScenarioTypeEnum eScenarioType; 
-#ifdef __cplusplus
-  TRoiArea() {
-    iNumROI = 0;
-    pROIArea = 0;
-    iVirtualBackgroundType = 0;
-    uiPicWidth = 0;
-    uiPicHeight = 0;
-    eScenarioType = ST_ROI_FOR_RC;
-  }
-#endif
-} SROIArea;
-
-typedef struct TRoiGet { //for security, have to use a different interface for GetOption for ROI
-  unsigned int iNumROI;
-  SROI aROI[MAX_ROI_NUM_OF_FRAME];
-#ifdef __cplusplus
-  TRoiGet() {
-    iNumROI = 0;
-    for (int i = 0; i < MAX_ROI_NUM_OF_FRAME; i++) {
-      aROI[i].iPosX = aROI[i].iPosY = aROI[i].iROIWidth = aROI[i].iROIHeight = 0;
-    }
-  }
-#endif
-} SRoiGet;
-
-typedef struct TMetaRoi {
-    unsigned int iNumROI;
-    SROI aROI[MAX_META_ROI_NUM_OF_FRAME]; //aRoi[0]:group info ; aRoi[1->255+1]: face info
-    #ifdef __cplusplus
-  TMetaRoi() {
-    iNumROI = 0;
-    for (int i = 0; i < MAX_META_ROI_NUM_OF_FRAME; i++) {
-      aROI[i].iPosX = aROI[i].iPosY = aROI[i].iROIWidth = aROI[i].iROIHeight = 0;
-    }
-  }
-#endif
-} SMetaRoi;
-
-
-typedef struct TOperationalPoint {
-  unsigned int uiIndex;
-  unsigned int uiBitRate;       //in bps
-  unsigned int uiTolerantDelaySeconds; //in seconds, can omit and leave it 0, then will use DEFAULT value
-} SOperationalPoint;
 
 /**
 * @brief Enumerate the type of video format
@@ -576,86 +448,6 @@ typedef enum {
   ASP_EXT_SAR = 255
 } ESampleAspectRatio;
 
-/**
- * @brief Structure  for  SEI
- */
-typedef enum {
-  SEI_RECTINFOONLY = 0x11,       ///<only rect info
-  SEI_MASKINFOONLY = 0x12,       ///<only mask info
-  SEI_RECTMASKINFO = 0x13,       ///<rect and mask info
-  SEI_MSGCANCELLED = 0x10,       ///<cancel info, notice there is no signal  info of SEI
-} ESeiMsgType;
-
-enum  BI_LEVEL_TYPES {
-    JBIG2_GENERIC_REGION_NO_HEADER = 0,
-    JBIG2_GENERIC_REGION_CONCISE_COMPRESSION = 1,
-};
-
-typedef enum {
-    MASK_TYPE_JBIG2 = JBIG2_GENERIC_REGION_NO_HEADER,
-    MASK_TYPE_JBIG2_GRCC = JBIG2_GENERIC_REGION_CONCISE_COMPRESSION,
-    MASK_TYPE_LZ4 = 2,
-    MASK_TYPE_NONE = 3,
-    MASK_TYPE_NUM = 4
-} ESeiMaskType;
-
-
-typedef struct {
-  int iImmersiveRectID;         ///<ID of immersive rectangle
-  int iImmersiveRectPosX;       ///< x-coordinate of the immersive rectangle
-  int iImmersiveRectPosY;       ///< y-coordinate of the immersive rectangle
-  int iImmersiveRectWidth;      ///<width of the immersive rectangle
-  int iImmersiveRectHeight;     ///<height of the immersive rectangle
-  int iImmersiveShareWidth;     ///<width of shared width
-  int iImmersiveShareHeight;    ///<height of shared height
-} SSeiRectInfo;
-
-typedef struct {
-  bool bMaskBoundingBoxFlag;    ///<indicate whether has bounding box of mask in sei
-  int iBoundingBoxX;            ///<pos x of bounding box
-  int iBoundingBoxY;            ///<pos y of bounding box
-  int iBoundingBoxXSize;        ///<box width of bounding box
-  int iBoundingBoxYSize;        ///<box height of bounding box
-} SSeiMaskBounding;
-
-typedef struct {
-  ESeiMaskType   eMaskType;             ///<mask compression type in sei
-  unsigned char iMaskBitDepth;          ///<bit depth of mask
-  unsigned char* pMaskAddr;             ///<addr of Immersive Share Mask
-  int iMaskLen;                         ///<length of Immersive Share Mask,  > 0 :means that pMaskAddr is valid
-  int iMaskWidth;                       ///<width of mask
-  int iMaskHeight;                      ///<height of mask
-  SSeiMaskBounding sSeiMaskBoundBox;    ///<<bounding box of mask in sei
-} SSeiMaskInfo;
-
-typedef struct {
-  ESeiMsgType   eSeiType;
-  SSeiRectInfo* pSeiRect;
-  SSeiMaskInfo* pSeiMask;
-  int         reserved[12];
-} SSeiRectArea, PSSeiRectArea;
-
-typedef struct {
-  unsigned char* pNalAddr;              /// < address of NalUnit
-  int iNalSize;                         /// iNalSize > 0 means  address of pNalAddr is valid.
-} SSeiNalDst, PSSeiNalDst;
-
-
-/**
- * @brief Structure  for  meta SEI
- */
-typedef struct {
-    int     iVideoWidth;
-    int     iVideoHeight;
-}SPictureInfo;
-
-/**
- * @brief Structure  for  sharpness SEI
- */
-typedef struct {
-    unsigned char uiVersion; //4-bit version
-    unsigned char uiSharpInfo;
-}SSeiSharpness;
 
 /**
 * @brief  Structure for spatial layer configuration
@@ -664,24 +456,13 @@ typedef struct {
   int   iVideoWidth;           ///< width of picture in luminance samples of a layer
   int   iVideoHeight;          ///< height of picture in luminance samples of a layer
   float fFrameRate;            ///< frame rate specified for a layer
-  int   iMinQp;                ///< Min QP specified for a layer
-  int   iMaxQp;                ///< Max QP specified for a layer
   int   iSpatialBitrate;       ///< target bitrate for a spatial layer, in unit of bps
   int   iMaxSpatialBitrate;    ///< maximum  bitrate for a spatial layer, in unit of bps
   EProfileIdc  uiProfileIdc;   ///< value of profile IDC (PRO_UNKNOWN for auto-detection)
   ELevelIdc    uiLevelIdc;     ///< value of profile IDC (0 for auto-detection)
   int          iDLayerQp;      ///< value of level IDC (0 for auto-detection)
-  DENOISE_MODES  iDLayerDenoiseMode;///< value of denoise mode for a layer (-1 for disable , 2 for auto-detection)
 
   SSliceArgument sSliceArgument;
-
-  int iLayerROINum;
-  SROI pLayerROI[MAX_ROI_NUM_OF_FRAME];
-
-  int iLayerSeiRectNum;
-  int iLayerSeiMsgType;
-  SSeiRectInfo pLayerSeiRect[MAX_RECT_NUM_OF_FRAME];
-  SSeiMaskInfo pLayerSeiMask[MAX_RECT_NUM_OF_FRAME];
 
   // Note: members bVideoSignalTypePresent through uiColorMatrix below are also defined in SWelsSPS in parameter_sets.h.
   bool      bVideoSignalTypePresent;  // false => do not write any of the following information to the header
@@ -721,7 +502,7 @@ typedef enum {
 * @brief Enumulate the complexity mode
 */
 typedef enum {
-  LOW_COMPLEXITY = 0,         ///< the lowest compleixty,the fastest speed,
+  LOW_COMPLEXITY = 0,              ///< the lowest compleixty,the fastest speed,
   MEDIUM_COMPLEXITY,          ///< medium complexity, medium speed,medium quality
   HIGH_COMPLEXITY             ///< high complexity, lowest speed, high quality
 } ECOMPLEXITY_MODE;
@@ -736,46 +517,6 @@ typedef enum {
   SPS_LISTING_AND_PPS_INCREASING  = 0x03,
   SPS_PPS_LISTING  = 0x06,
 } EParameterSetStrategy;
-
-/**
- * @brief Enumulate for EVideoCodecStrategy
- */
-typedef enum {
-  CLEAR_STRATEGY = 0,
-  REFERENCE_STRATEGY = 1,           ///< refer to EReferenceStrategy
-  SCREEN_RC_STRATEGY,               ///< screen rate-control strategy, refer to ERateControlStrategy
-  VIDEO_CODEC_STRATEGY_ALL,
-} EVideoCodecStrategy;              ///< updating strategy may result in IDR if in middle of encoding!
-
-/**
- * @brief Structure for EVideoCodecStrategy
- */
-typedef struct TVideoCodecStrategy {
-  unsigned int uiStrategyIndex;
-  unsigned int uiStrategyValue;
-} SVideoCodecStrategy;
-
-/**
- * @brief Enumulate for the stategy of reference strategy
- */
-typedef enum {
-  //0 means NO_STRATEGY
-  NO_STRATEGY = 0,
-  TEMPORAL_LAYER = 1,           ///< temporal layer based
-  ADAPTIVE_FOR_HIGH_COMPRESSION, ///< for high compression
-  ADAPTIVE_FOR_LOSSLESS,
-} EReferenceStrategy;
-
-/**
- * @brief Enumulate for ERateControlStrategy
- */
-typedef enum {
-  //0 means NO_STRATEGY
-  PREFER_SIZE_CONTROL = 1,           ///< PREFER_SIZE_CONTROL, suggest to be set before Initialize
-} ERateControlStrategy;
-
-
-
 
 // TODO:  Refine the parameters definition.
 /**
@@ -810,15 +551,6 @@ typedef struct TagEncParamExt {
   int       iSpatialLayerNum;          ///< spatial layer number,1<= iSpatialLayerNum <= MAX_SPATIAL_LAYER_NUM, MAX_SPATIAL_LAYER_NUM = 4
   SSpatialLayerConfig sSpatialLayers[MAX_SPATIAL_LAYER_NUM];
 
-  unsigned int uiROINum;                          /// < number of ROIs in frame
-  SROI sRoiInfo[MAX_ROI_NUM_OF_FRAME];  /// < ROI structrue (posX, posY, Width, Height)
-  int  iVirtualBackgroundType;             /// < ROI type: 0 for narmal, 1 and 2 for blur or VBG, 3 for GIF or Video VBG
-
-  bool    bEnableInter4x4;              /// < whether enable inter 4x4, 4x8 and 8x4 block partition, default false
-  bool    bEnableIntra4x4;              /// < whether enable intra4x4 check, default false
-
-  int     iTemporalLayer0Ratio;         /// < flexiable temporal layer bitrate ratio setting for T0 and T1
-
   ECOMPLEXITY_MODE iComplexityMode;
   unsigned int      uiIntraPeriod;     ///< period of Intra frame
   int               iNumRefFrame;      ///< number of reference frame used
@@ -826,11 +558,9 @@ typedef struct TagEncParamExt {
   eSpsPpsIdStrategy;       ///< different stategy in adjust ID in SPS/PPS: 0- constant ID, 1-additional ID, 6-mapping and additional
   bool    bPrefixNalAddingCtrl;        ///< false:not use Prefix NAL; true: use Prefix NAL
   bool    bEnableSSEI;                 ///< false:not use SSEI; true: use SSEI -- TODO: planning to remove the interface of SSEI
-  bool    bEnableRectSEI;              ///<false:not use immersive_rect SEI; true: use immersive_rect SEI
   bool    bSimulcastAVC;               ///< (when encoding more than 1 spatial layer) false: use SVC syntax for higher layers; true: use Simulcast AVC
   int     iPaddingFlag;                ///< 0:disable padding;1:padding
   int     iEntropyCodingModeFlag;      ///< 0:CAVLC  1:CABAC.
-  bool    bEnableTransform8x8ModeFlag; ///< false:not use Transform 8x8 mode; true: use Transform 8x8 mode
 
   /* rc control */
   bool    bEnableFrameSkip;            ///< False: don't skip frame even if VBV buffer overflow.True: allow skipping frames to keep the bitrate within limits
@@ -853,30 +583,15 @@ typedef struct TagEncParamExt {
   int       iLoopFilterAlphaC0Offset;  ///< AlphaOffset: valid range [-6, 6], default 0
   int       iLoopFilterBetaOffset;     ///< BetaOffset: valid range [-6, 6], default 0
   /*pre-processing feature*/
-  DENOISE_MODES    iDenoiseMode;       ///< denoise control
+  bool    bEnableDenoise;              ///< denoise control
   bool    bEnableBackgroundDetection;  ///< background detection control //VAA_BACKGROUND_DETECTION //BGD cmd
   bool    bEnableAdaptiveQuant;        ///< adaptive quantization control
   bool    bEnableFrameCroppingFlag;    ///< enable frame cropping flag: TRUE always in application
   bool    bEnableSceneChangeDetect;
 
-  bool    bIsLosslessLink;            ///<  LTR advanced setting
-
-  EReferenceStrategy eReferenceStrategy;
-
-  bool    bEnableAdapFps;
-  bool    bEnableAdaptiveResolution;
-  
-  SOperationalPoint sOperationalBitrate;            ///< operational point, now we only support one besides of total, in future may change to SOperationalPoint sOperationalBitrate[MAX_OPERATIONAL_POINT] if needed
-  unsigned int iVideoCodecStrategy[VIDEO_CODEC_STRATEGY_ALL]; /// < encoder strategies
-
-  bool      bEncodeSeiOnly;
-  bool      bSeiRectSet;
-  bool      bSeiMaskSet;
-  int       iSeiMsyType;
-  int       iSeiMaskSize;            ///<size of sei mask before compression
-  SSeiRectInfo  sSeiRectInfo[MAX_RECT_NUM_OF_FRAME];
-  /*external video process*/
-  void*     pExternalVp;
+  bool    bIsLosslessLink;             ///< LTR advanced setting
+  bool    bFixRCOverShoot;             ///< fix rate control overshooting
+  int     iIdrBitrateRatio;            ///< the target bits of IDR is (idr_bitrate_ratio/100) * average target bit per frame.
 } SEncParamExt;
 
 /**
@@ -933,8 +648,6 @@ typedef struct {
   int iFrameSizeInBytes;
   long long uiTimeStamp;
 } SFrameBSInfo, *PFrameBSInfo;
-
-
 
 /**
 *  @brief Structure for source picture
@@ -1021,37 +734,6 @@ typedef struct TagParserBsInfo {
 /**
 * @brief Structure for encoder statistics
 */
-typedef enum {
-  IDR_Reason_Requested = 0,
-  IDR_Reason_Scene_Change, // scene change detection from encoder
-  IDR_Reason_Param_Change, // encoder parameter change.
-  IDR_Reason_Periodical,
-  IDR_Reason_RequestedOtherD,
-  IDR_Reason_OperationalPoint,
-  IDR_Reason_InternalError,
-  IDR_Reason_EncLayerIndexChange,
-//  IDR_Reason_Unknown,
-  IDR_Reasons_All
-} IDR_Reasons;
-
-typedef struct TagVideoStrategyFpsResSuggestion {
-  unsigned int uiAdjustStatus;
-  unsigned int uiSuggestedFrameRate;
-  unsigned int uiSuggestedFrameSize;
-  unsigned int uiLowLimitBwPerResolution[NUM_OF_RES_CANDS];
-} VideoStrategyFpsResSuggestion;
-
-typedef struct TagVideoEncoderStatisticsOfScene { //short-term stats and will be cleaned at IDR
-    //short-terms only collects short-term stats and will clear after each call
-    int   iMinRegionalQp_ShortTerm;
-    int   iMaxRegionalQp_ShortTerm;
-    int   iMaxFrameQp_ShortTerm;
-    int   iMaxNoiseLevel_ShortTerm;
-
-    long long    iFrameTimestampGapMin;                  ///< minimal input FrameTimestampGap
-    long long    iFrameTimestampGapMax;                  ///< maximal input FrameTimestampGap
-} VideoEncoderStatisticsOfScene;
-
 typedef struct TagVideoEncoderStatistics {
   unsigned int uiWidth;                        ///< the width of encoded frame
   unsigned int uiHeight;                       ///< the height of encoded frame
@@ -1063,8 +745,6 @@ typedef struct TagVideoEncoderStatistics {
   float fLatestFrameRate;                      ///< the frame rate in, in the last second, supposed that the input timestamp is in unit of ms (? useful for checking BR, but is it easy to calculate?
   unsigned int uiBitRate;                      ///< sendrate in Bits per second, calculated within the set time-window
   unsigned int uiAverageFrameQP;                    ///< the average QP of last encoded frame
-  unsigned int uiLumaQp_ROI;
-  unsigned int uiLumaQp_NotROI;
 
   unsigned int uiInputFrameCount;              ///< number of frames
   unsigned int uiSkippedFrameCount;            ///< number of frames
@@ -1079,33 +759,7 @@ typedef struct TagVideoEncoderStatistics {
   unsigned long iTotalEncodedBytes;
   unsigned long iLastStatisticsBytes;
   unsigned long iLastStatisticsFrameCount;
-
-  // preprocess related
-  int   iTotalNoiseIntensity;
-  int   iNoiseDistribution[NOISE_LEVEL_NUM];
-  int   iAverageNoiseIntensity;
-  int   iMajorNoiseLevel;
-
-  //IDR reasons
-  unsigned int uiIDRSent_Reasons[IDR_Reasons_All];         ///< number of IDRs sent due to scene-change
-    
-  VideoEncoderStatisticsOfScene sSceneStats;
 } SEncoderStatistics;
-
-/**
- * @brief Structure for SLayerAdapFPSInfo
- */
-typedef struct TagLayerAdapFPSFeedBack {
-  VideoStrategyFpsResSuggestion SAdapFpsFeedback[MAX_SPATIAL_LAYER_NUM]; ///< SLayerAdapFPSInfo of the layer
-} SLayerAdapFPSInfo;
-
-/**
- * @brief Structure for sEncoderStatistics
- */
-typedef struct TagLayerStatisticsInfo {
-  int iLayer;
-  SEncoderStatistics sEncoderStatistics; ///< sEncoderStatistics of the layer
-} SLayerStatisticsInfo;
 
 /**
 * @brief  Structure for decoder statistics
@@ -1154,71 +808,5 @@ typedef struct TagVuiSarInfo {
   unsigned int uiSarHeight;                    ///< SAR height
   bool bOverscanAppropriateFlag;               ///< SAR overscan flag
 } SVuiSarInfo, *PVuiSarInfo;
-
-
-/**
-* @brief Structure for Mari LTRF support
-*/
-//Parameters that serves two purposes. It should tell the encoder how dpb should look like after a frame encode.
-// It should also inform the external dpb what actually happened after an encode.
-
-typedef struct TagReferenceFrames {
-  unsigned int uiReferenceId[4];
-  unsigned int uiNumRef;
-} SReferenceFrames;
-/**
- * @brief Frame Importance
- */
-typedef enum {
-  FRAME_IMPORTANCE_LOW,
-  FRAME_IMPORTANCE_NORMAL,
-  FRAME_IMPORTANCE_HIGH
-} EFrameImportance;
-
-typedef void (*WelsContentChangeCallbackFunc) (void* pIntance, int iContentType); //0:video  1:text
-
-typedef struct TagSWelsContentChangeCallback {
-  WelsContentChangeCallbackFunc pCallbackFun;
-  void* pCallbackInstance;   //callback function
-} SWelsContentChangeCallback;
-
-typedef struct TagH264DPBParamsFrame {
-  bool bUsed;
-  unsigned int uiFrameId;
-  unsigned int uiFrameNum;
-  int iLTFi; // -1 means ST
-  EVideoFrameType eFrameType;
-  EFrameImportance eImportance;
-  unsigned int uiTemporalId;
-  SReferenceFrames sRef;
-  unsigned int timestamp;
-} SH264DPBParamsFrame;
-
-typedef struct TagH264DPBParams {
-  //external
-  unsigned int uiMaxNumRef; //Updated in SPS
-  unsigned int uiMaxNumLt; //updated with mmco commands(h264)
-  SH264DPBParamsFrame sCurFrame;
-  SH264DPBParamsFrame sRefFrames[17];
-} SH264DPBParams;
-
-typedef void (*WelsSharpInfoChangeCallbackFunc) (void* pIntance, int iSharpInfo); //0:motion, 100: screen
-typedef struct TagSWelsSharpInfoChangeCallback {
-  WelsSharpInfoChangeCallbackFunc pCallbackFun;
-  void* pCallbackInstance;   //callback function
-} SWelsSharpInfoChangeCallback;
-
-typedef void (*WelsRectSeiInfoCallbackFunc) (void* pInstance, SSeiRectInfo* pRectSeiInfo, SSeiMaskInfo* pMaskSeiInfo,
-    ESeiMsgType eMsgType);
-typedef struct TagSWelsRectSeiInfoCallback {
-  WelsRectSeiInfoCallbackFunc pCallbackFun;
-  void* pCallbackInstance;  //callback function
-} SWelsRectSeiInfoCallback;
-
-typedef void (*WelsMetaSeiInfoCallbackFunc) (void* pInstance, SMetaRoi *pMetaRoi);
-typedef struct TagSWelsMetaSeiInfoCallback {
-    WelsMetaSeiInfoCallbackFunc pCallbackFun;
-    void* pCallbackInstance;  //callback function
-} SWelsMetaSeiInfoCallback;
 
 #endif//WELS_VIDEO_CODEC_APPLICATION_DEFINITION_H__
