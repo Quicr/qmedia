@@ -23,7 +23,7 @@ target_link_libraries(qmedia
     PUBLIC
         ${LIBRARIES}
         OpenSSL::Crypto
-        openh264
+        ${openh264}
         quicr)
 target_include_directories(qmedia
     PUBLIC
