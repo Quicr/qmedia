@@ -5,6 +5,7 @@
     "protobuf",
     "opus",
     "openssl",
+    "openh264",
     "doctest",
     "libsamplerate",
     "curl",

@@ -106,6 +106,9 @@ if (APPLE)
 
   message(STATUS "openh64: ${OpenH264_LIB_DIR}")
   message(STATUS "openh64-inc ${OpenH264_INCLUDE_DIR}")
+else()
+    find_library(openh264 openh264 REQUIRED)
+    message(STATUS "Found OpenH264: ${openh264}")
 endif()
 
 ###
