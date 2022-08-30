@@ -13,7 +13,7 @@ struct Constants {
     struct NEO_MEDIA {
 
         // NeoMediaInstance Init parameters.
-        static let sfu = "127.0.0.1" //"18.191.247.162" //"13.56.164.43"//"127.0.0.1" // "54.201.7.152" // "18.236.63.86"
+        static let sfu = "origin.us-east-2.quicr.ctgpoc.com"
         static let port = UInt16(7777)
         static let domainId =  UInt64(1000)
         static let confernceId =  UInt64(2000)

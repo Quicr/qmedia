@@ -94,6 +94,7 @@ void Metrics::pusher()
 
         push_signals = false;
         bool print_error = true;
+        // collect metrics
         for (const auto &mes : measurements)
         {
             auto mlines = mes.second->lineProtocol();
@@ -103,8 +104,6 @@ void Metrics::pusher()
             }
             std::string points;
             for (const auto &point : mlines) points += point;
-
-            // std::clog << points << std::endl;
 
             curl_easy_setopt(
                 handle, CURLOPT_POSTFIELDSIZE_LARGE, points.length());

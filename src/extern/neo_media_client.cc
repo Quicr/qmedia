@@ -158,7 +158,8 @@ extern "C"
         }
         auto media_client = static_cast<MediaClient *>(instance);
 
-        return media_client->get_audio(streamId, *timestamp, buffer, max_len, to_free);
+        return media_client->get_audio(
+            streamId, *timestamp, buffer, max_len, to_free);
     }
 
     void CALL MediaClient_sendVideoFrame(void *instance,
@@ -213,7 +214,8 @@ extern "C"
             streamId, *timestamp, *width, *height, *format, buffer, to_free);
     }
 
-    void CALL release_media_buffer(void *instance, void* buffer) {
+    void CALL release_media_buffer(void *instance, void *buffer)
+    {
         if (!instance || !buffer)
         {
             return;

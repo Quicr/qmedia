@@ -89,7 +89,8 @@ Sync::sync_action Sync::getVideoAction(unsigned int /*audio_pop_delay*/,
         else
         {
             // if we find out-of-order deeper in the queue - wait
-            if (action == pop) {
+            if (action == pop)
+            {
                 break;
             }
 

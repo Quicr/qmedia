@@ -92,5 +92,5 @@ extern "C"
                                                         unsigned char **buffer,
                                                         void **to_free);
 
-    EXPORT void CALL release_media_buffer(void *instance, void* buffer);
+    EXPORT void CALL release_media_buffer(void *instance, void *buffer);
 }

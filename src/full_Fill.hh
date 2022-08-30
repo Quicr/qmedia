@@ -19,7 +19,8 @@ public:
     void addBuffer(const uint8_t *buffer,
                    unsigned int length,
                    std::uint64_t timestamp);
-    bool fill(LoggerPointer logger, std::vector<uint8_t> &fill_buffer,
+    bool fill(LoggerPointer logger,
+              std::vector<uint8_t> &fill_buffer,
               unsigned int fill_length,
               std::uint64_t &timestamp);
 

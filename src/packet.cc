@@ -75,6 +75,7 @@ struct PBEncoder
         hdr->set_sourceid(packet->sourceID);
         hdr->set_sourcerecordtime(packet->sourceRecordTime);
         hdr->set_encodedseqnumber(packet->encodedSequenceNum);
+        hdr->set_encodedtime(packet->packet_encoded_time);
 
         auto content =
             std::make_unique<media_message::StreamMessage_StreamContent>();
@@ -148,6 +149,7 @@ struct PBDecoder
         packet_out->sourceRecordTime = hdr.sourcerecordtime();
         packet_out->sourceID = hdr.sourceid();
         packet_out->encodedSequenceNum = hdr.encodedseqnumber();
+        packet_out->packet_encoded_time = hdr.encodedtime();
     }
 
     static bool decode(const std::vector<uint8_t> &data_in, Packet *packet_out)

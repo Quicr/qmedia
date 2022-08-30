@@ -184,7 +184,6 @@ void MetaQueue::queueAudioFrame(PacketPointer raw_packet,
             }
         }
     }
-
 }
 
 PacketPointer MetaQueue::pop(std::chrono::steady_clock::time_point now)

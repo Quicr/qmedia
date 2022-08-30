@@ -23,6 +23,7 @@ message MediaDataHeader {
   uint64  sourceID = 2;            // audio/video/... unique source identifier
   fixed64 sourceRecordTime = 3;    // nanoseconds since unix epoch
   uint64  encodedSeqNumber = 4;
+  uint64  encodedTime = 5;
 
   oneof header {
     Video video_header = 8;

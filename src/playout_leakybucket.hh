@@ -50,7 +50,9 @@ public:
               unsigned int fps,
               LoggerPointer logger = nullptr);
     void adjustQueueDepthTrackerDiscardedPackets(int num);
-    bool initialFill(unsigned int ms_in_queue, unsigned int jitter_ms, LoggerPointer logger=nullptr);
+    bool initialFill(unsigned int ms_in_queue,
+                     unsigned int jitter_ms,
+                     LoggerPointer logger = nullptr);
     double getSrcRatio();
 
 private:

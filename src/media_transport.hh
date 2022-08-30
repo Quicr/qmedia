@@ -16,15 +16,15 @@ struct TransportMessageInfo
     quicr::bytes data;
 };
 
-struct TransportMessageHandler {
+struct TransportMessageHandler
+{
     virtual ~TransportMessageHandler() = default;
-    virtual void handle(TransportMessageInfo&& info) = 0;
+    virtual void handle(TransportMessageInfo &&info) = 0;
 };
-
 
 struct Delegate : public quicr::QuicRClient::Delegate
 {
-    Delegate(TransportMessageHandler* handler);
+    Delegate(TransportMessageHandler *handler);
 
     virtual void on_data_arrived(const std::string &name,
                                  quicr::bytes &&data,
@@ -37,18 +37,20 @@ struct Delegate : public quicr::QuicRClient::Delegate
     virtual void log(quicr::LogLevel level,
                      const std::string &message) override;
 
-
     void set_logger(LoggerPointer logger_in);
 
 private:
     LoggerPointer logger;
-    TransportMessageHandler* message_handler;
+    TransportMessageHandler *message_handler;
 };
 
-struct MediaTransport : TransportMessageHandler {
+struct MediaTransport : TransportMessageHandler
+{
     virtual ~MediaTransport() = default;
-    virtual void register_stream(uint64_t id, MediaConfig::MediaDirection direction) = 0;
-    virtual void unregister_stream(uint64_t id, MediaConfig::MediaDirection direction) = 0;
+    virtual void register_stream(uint64_t id,
+                                 MediaConfig::MediaDirection direction) = 0;
+    virtual void unregister_stream(uint64_t id,
+                                   MediaConfig::MediaDirection direction) = 0;
     virtual void send_data(uint64_t id, quicr::bytes &&data) = 0;
     virtual void wait_for_messages() = 0;
     virtual TransportMessageInfo recv() = 0;
@@ -58,13 +60,16 @@ struct MediaTransport : TransportMessageHandler {
 struct QuicRMediaTransport : public MediaTransport
 {
     explicit QuicRMediaTransport(const std::string &server_ip,
-                            const uint16_t port,
-                            LoggerPointer logger_in);
+                                 const uint16_t port,
+                                 LoggerPointer logger_in);
     ~QuicRMediaTransport() = default;
 
-    virtual void register_stream(uint64_t id, MediaConfig::MediaDirection direction) override;
+    virtual void register_stream(uint64_t id,
+                                 MediaConfig::MediaDirection direction) override;
 
-    virtual void unregister_stream(uint64_t id, MediaConfig::MediaDirection direction) override;
+    virtual void
+    unregister_stream(uint64_t id,
+                      MediaConfig::MediaDirection direction) override;
 
     virtual void send_data(uint64_t id, quicr::bytes &&data) override;
 
@@ -72,7 +77,7 @@ struct QuicRMediaTransport : public MediaTransport
 
     virtual TransportMessageInfo recv() override;
 
-    virtual void handle(TransportMessageInfo&& info) override;
+    virtual void handle(TransportMessageInfo &&info) override;
 
 private:
     Delegate delegate;

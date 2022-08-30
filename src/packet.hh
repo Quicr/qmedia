@@ -22,6 +22,12 @@ namespace qmedia
 class Packet;
 using PacketPointer = std::unique_ptr<Packet>;
 
+struct TimePoint
+{
+    uint64_t start{0};
+    uint64_t stop{0};
+};
+
 class Packet
 {
 public:
@@ -65,6 +71,7 @@ public:
     std::vector<uint8_t> encoded_data;        // transport encoded
 
     LoggerPointer logger = nullptr;
+    uint64_t packet_encoded_time = 0;
 };
 
 std::ostream &operator<<(std::ostream &os, const Packet::Type &pktType);
