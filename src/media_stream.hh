@@ -30,7 +30,8 @@ public:
         client_id(client_id_in),
         config(config_in),
         logger(logger_in)
-    {}
+    {
+    }
 
     virtual ~MediaStream() = default;
 
@@ -44,7 +45,7 @@ public:
                              MediaConfig &config,
                              unsigned char **buffer,
                              unsigned int max_len,
-                             void** to_free) = 0;
+                             void **to_free) = 0;
 
     void set_transport(std::shared_ptr<MediaTransport> transport)
     {
@@ -91,11 +92,12 @@ struct AudioStream : public MediaStream
                              MediaConfig &config,
                              unsigned char **buffer,
                              unsigned int max_len,
-                             void** to_free) override;
+                             void **to_free) override;
 
 private:
     std::shared_ptr<AudioEncoder> setupAudioEncoder();
-    void audio_encoder_callback(std::vector<uint8_t> &&bytes, uint64_t timestamp);
+    void audio_encoder_callback(std::vector<uint8_t> &&bytes,
+                                uint64_t timestamp);
     std::shared_ptr<AudioEncoder> encoder = nullptr;
     uint64_t encode_sequence_num = 0;
 };
@@ -123,7 +125,7 @@ struct VideoStream : public MediaStream
                              MediaConfig &config,
                              unsigned char **buffer,
                              unsigned int max_len,
-                             void** to_free) override;
+                             void **to_free) override;
 
 private:
     PacketPointer encode_h264(uint8_t *buffer,
@@ -134,8 +136,8 @@ private:
     std::unique_ptr<VideoEncoder> encoder = nullptr;
     uint64_t encode_sequence_num = 0;
     std::atomic<bool> is_decoder_initialized = false;
-    std::uint64_t group_id {0};
-    std::uint64_t object_id {0};
+    std::uint64_t group_id{0};
+    std::uint64_t object_id{0};
     bool got_first_idr = false;
 };
 

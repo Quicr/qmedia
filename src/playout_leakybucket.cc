@@ -13,7 +13,8 @@ unsigned int LeakyBucket::getRecommendedFillLevel(unsigned int audio_jitter_ms)
     unsigned int new_target = target_fill_level;
     unsigned int min_jitter_ms = audio_jitter_ms;
 
-    if (min_jitter_ms > new_target) {
+    if (min_jitter_ms > new_target)
+    {
         new_target = min_jitter_ms;
     }
 
@@ -83,7 +84,8 @@ void LeakyBucket::tick(std::chrono::steady_clock::time_point now,
                        unsigned int fps,
                        LoggerPointer logger)
 {
-    if (initialFill(queue_depth, audio_jitter_ms)) {
+    if (initialFill(queue_depth, audio_jitter_ms))
+    {
         logger->debug << "tick  initial fill true" << std::flush;
         return;
     }
@@ -103,7 +105,7 @@ void LeakyBucket::tick(std::chrono::steady_clock::time_point now,
         new_target_fill_ms = max_bucket_size;
 
     int current_fill_level_ms = queue_depth * ms_per_audio;
-    //int current_fill_level_ms = queue_depth;
+    // int current_fill_level_ms = queue_depth;
 
     fill_change = current_fill_level_ms - new_target_fill_ms;
 
@@ -114,25 +116,28 @@ void LeakyBucket::tick(std::chrono::steady_clock::time_point now,
     else
         current_drain = normal;
 
-    logger->debug <<"tick: fill levels: minimum_fill_level_ms=" << minimum_fill_level_ms
-                 << ",target_fill_level=" << target_fill_level
-                 << ", max_bucket_size=" << max_bucket_size
-                 << ", current_fill_level=" << current_fill_level_ms
-                 << ", fill_change=" << fill_change
-                 << ", current_drain=" << current_drain
-                 << std::flush;
-
+    logger->debug
+        << "tick: fill levels: minimum_fill_level_ms=" << minimum_fill_level_ms
+        << ",target_fill_level=" << target_fill_level
+        << ", max_bucket_size=" << max_bucket_size
+        << ", current_fill_level=" << current_fill_level_ms
+        << ", fill_change=" << fill_change
+        << ", current_drain=" << current_drain << std::flush;
 }
 
-bool LeakyBucket::initialFill(unsigned int ms_in_queue, unsigned int jitter_ms, LoggerPointer logger)
+bool LeakyBucket::initialFill(unsigned int ms_in_queue,
+                              unsigned int jitter_ms,
+                              LoggerPointer logger)
 {
     if (initial_fill)
     {
         // jitter vs target vs max
         unsigned int start_ms = getRecommendedFillLevel(jitter_ms);
 
-        if(logger) {
-            logger->debug << "[initialFill] ms_in_queue " << ms_in_queue << ",start_ms " << start_ms << std::flush;
+        if (logger)
+        {
+            logger->debug << "[initialFill] ms_in_queue " << ms_in_queue
+                          << ",start_ms " << start_ms << std::flush;
         }
         if (ms_in_queue >= start_ms)
         {

@@ -46,15 +46,16 @@ void VideoStream::configure()
             assert("Invalid media direction");
     }
 
-    auto jitter =  JitterFactory::GetJitter(logger, client_id);
+    auto jitter = JitterFactory::GetJitter(logger, client_id);
     if (jitter == nullptr)
     {
-        logger->error << "[VideoStream::configure]: jitter is null" << std::flush;
+        logger->error << "[VideoStream::configure]: jitter is null"
+                      << std::flush;
     }
 
     jitter->set_video_params(config.video_max_width,
                              config.video_max_height,
-                             (uint32_t ) config.video_decode_pixel_format);
+                             (uint32_t) config.video_decode_pixel_format);
 }
 
 MediaStreamId VideoStream::id()
@@ -106,15 +107,21 @@ void VideoStream::handle_media(MediaConfig::CodecType codec_type,
                     return;
                 }
 
-                if (encoded->is_intra_frame) {
-                    if (got_first_idr) {
+                if (encoded->is_intra_frame)
+                {
+                    if (got_first_idr)
+                    {
                         group_id += 1;
                         object_id = 0;
-                        logger->info << "[VideoStream:handle_media]: New group started:"
+                        logger->info << "[VideoStream:handle_media]: New group "
+                                        "started:"
                                      << group_id << std::flush;
-                    } else {
+                    }
+                    else
+                    {
                         got_first_idr = true;
-                        logger->info << "[VideoStream:handle_media]: First group started:"
+                        logger->info << "[VideoStream:handle_media]: First "
+                                        "group started:"
                                      << group_id << std::flush;
                     }
                 }
@@ -128,7 +135,8 @@ void VideoStream::handle_media(MediaConfig::CodecType codec_type,
         }
         break;
         case MediaConfig::CodecType::raw:
-        {}
+        {
+        }
         break;
         default:
             assert("Incorrect codec type");
@@ -139,7 +147,7 @@ size_t VideoStream::get_media(uint64_t &timestamp,
                               MediaConfig &config_in,
                               unsigned char **buffer,
                               unsigned int /*max_len*/,
-                              void** /*to_free*/)
+                              void ** /*to_free*/)
 {
     size_t recv_length = 0;
 
@@ -159,8 +167,10 @@ size_t VideoStream::get_media(uint64_t &timestamp,
                                    timestamp,
                                    buffer);
 
-    config_in.video_decode_pixel_format = (VideoConfig::PixelFormat) pixel_format;
-    if(buffer == nullptr) {
+    config_in.video_decode_pixel_format = (VideoConfig::PixelFormat)
+        pixel_format;
+    if (buffer == nullptr)
+    {
         assert(0);
     }
 
@@ -202,7 +212,8 @@ PacketPointer VideoStream::encode_h264(uint8_t *buffer,
     if (encoded_frame_type == VideoEncoder::EncodedFrameType::Skip ||
         encoded_frame_type == VideoEncoder::EncodedFrameType::Invalid)
     {
-        logger->info << "[VideoStream::encode_h264] Encoded Frame Type ignored due "
+        logger->info << "[VideoStream::encode_h264] Encoded Frame Type ignored "
+                        "due "
                      << (int) encoded_frame_type << std::flush;
         return nullptr;
     }

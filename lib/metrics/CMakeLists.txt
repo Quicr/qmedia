@@ -13,14 +13,8 @@ find_package(CURL REQUIRED)
 add_library(metrics
     src/measurements.cc
     src/metrics.cc)
-target_link_libraries(metrics
-    PUBLIC
-        ${CURL_LIBRARIES}
-        OpenSSL::SSL
-        OpenSSL::Crypto)
-target_include_directories(metrics
-    PUBLIC
-        ${CMAKE_SOURCE_DIR}/include)
+target_link_libraries(metrics PRIVATE ${CURL_LIBRARIES} OpenSSL::SSL OpenSSL::Crypto)
+target_include_directories(metrics PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_compile_options(metrics
     PRIVATE
         $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>: -Wpedantic -Wextra -Wall>

@@ -1,10 +1,10 @@
 #include <algorithm>
-#include "measurements.hh"
+#include <metrics/measurements.hh>
 
 namespace metrics
 {
 
-std::unique_ptr<InfluxMeasurement> InfluxMeasurement::createMeasurement(std::string name, Tags tags)
+std::unique_ptr<InfluxMeasurement> InfluxMeasurement::create(std::string name, Tags tags)
 {
         return std::make_unique<InfluxMeasurement>(name, tags);
 }

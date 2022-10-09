@@ -7,8 +7,9 @@ namespace qmedia
 /// Delegate
 ///
 
-Delegate::Delegate(TransportMessageHandler* handler)
-: message_handler(handler){}
+Delegate::Delegate(TransportMessageHandler *handler) : message_handler(handler)
+{
+}
 
 void Delegate::set_logger(LoggerPointer logger_in)
 {
@@ -20,12 +21,14 @@ void Delegate::on_data_arrived(const std::string &name,
                                std::uint64_t group_id,
                                std::uint64_t object_id)
 {
-    if(message_handler) {
-        if(data.size() > 100)
+    if (message_handler)
+    {
+        if (data.size() > 100)
         {
             log(quicr::LogLevel::debug, "on_data_arrived: name " + name);
         }
-        message_handler->handle(TransportMessageInfo{name, group_id, object_id, data});
+        message_handler->handle(
+            TransportMessageInfo{name, group_id, object_id, data});
     }
 }
 
@@ -60,10 +63,9 @@ void Delegate::log(quicr::LogLevel /*level*/, const std::string &message)
 ///
 
 QuicRMediaTransport::QuicRMediaTransport(const std::string &server_ip,
-                               const uint16_t port,
-                               LoggerPointer logger_in) :
-    delegate(this),
-    qr_client(delegate, server_ip, port), logger(logger_in)
+                                         const uint16_t port,
+                                         LoggerPointer logger_in) :
+    delegate(this), qr_client(delegate, server_ip, port), logger(logger_in)
 {
     while (!qr_client.is_transport_ready())
     {
@@ -74,7 +76,7 @@ QuicRMediaTransport::QuicRMediaTransport(const std::string &server_ip,
 }
 
 void QuicRMediaTransport::register_stream(uint64_t id,
-                                     MediaConfig::MediaDirection direction)
+                                          MediaConfig::MediaDirection direction)
 {
     logger->info << "[MediaTransport]: register_stream " << id << std::flush;
     auto qname = quicr::QuicrName{std::to_string(id), 0};
@@ -84,18 +86,22 @@ void QuicRMediaTransport::register_stream(uint64_t id,
     }
     else if (direction == MediaConfig::MediaDirection::recvonly)
     {
-        auto intent = quicr::SubscribeIntent{quicr::SubscribeIntent::Mode::immediate, 0, 0};
+        auto intent = quicr::SubscribeIntent{
+            quicr::SubscribeIntent::Mode::immediate, 0, 0};
         qr_client.subscribe({qname}, intent, false, true);
     }
     else
     {
         qr_client.register_names({qname}, false);
-        auto intent = quicr::SubscribeIntent{quicr::SubscribeIntent::Mode::immediate, 0, 0};
+        auto intent = quicr::SubscribeIntent{
+            quicr::SubscribeIntent::Mode::immediate, 0, 0};
         qr_client.subscribe({qname}, intent, false, true);
     }
 }
 
-void QuicRMediaTransport::unregister_stream(uint64_t id, MediaConfig::MediaDirection direction)
+void QuicRMediaTransport::unregister_stream(
+    uint64_t id,
+    MediaConfig::MediaDirection direction)
 {
     logger->info << "[MediaTransport]: unregister_stream " << id << std::flush;
     auto qname = quicr::QuicrName{std::to_string(id), 0};
@@ -114,27 +120,28 @@ void QuicRMediaTransport::unregister_stream(uint64_t id, MediaConfig::MediaDirec
     }
 }
 
-void QuicRMediaTransport::send_data(uint64_t id, quicr::bytes &&data,
-                                    uint64_t group_id, uint64_t object_id)
+void QuicRMediaTransport::send_data(uint64_t id,
+                                    quicr::bytes &&data,
+                                    uint64_t group_id,
+                                    uint64_t object_id)
 {
     auto qname = quicr::QuicrName{std::to_string(id), 0};
-    int* a = nullptr;
+    int *a = nullptr;
     *a++;
-    qr_client.publish_named_data(qname.name, std::move(data), group_id, object_id, 0, 0);
+    qr_client.publish_named_data(
+        qname.name, std::move(data), group_id, object_id, 0, 0);
 }
 
 void QuicRMediaTransport::wait_for_messages()
 {
     std::unique_lock<std::mutex> ulock(recv_queue_mutex);
-    recv_cv.wait(ulock, [&]() -> bool {
-                     return (shutdown || !receive_queue.empty());
-                 });
+    recv_cv.wait(
+        ulock, [&]() -> bool { return (shutdown || !receive_queue.empty()); });
     ulock.unlock();
 }
 
 TransportMessageInfo QuicRMediaTransport::recv()
 {
-
     TransportMessageInfo info;
     {
         std::lock_guard<std::mutex> lock(recv_queue_mutex);
@@ -145,10 +152,12 @@ TransportMessageInfo QuicRMediaTransport::recv()
         }
     }
 
-    if(info.data.size() > 200) {
-        logger->debug << "[QuicRMediaTransport:recv]: Got a message off the queue "
-                     << info.name << ", size:" << info.data.size() << ", q-size: "
-                     << receive_queue.size() << std::flush;
+    if (info.data.size() > 200)
+    {
+        logger->debug << "[QuicRMediaTransport:recv]: Got a message off the "
+                         "queue "
+                      << info.name << ", size:" << info.data.size()
+                      << ", q-size: " << receive_queue.size() << std::flush;
     }
     return info;
 }
