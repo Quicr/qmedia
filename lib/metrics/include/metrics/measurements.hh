@@ -12,14 +12,14 @@ enum struct MeasurementType
     FrameRate_Tx,    // frame count before transmit
     FrameRate_Rx,    // frame count from transport after re-assembly
     EncodeTime,      // time elapsed for encoding a raw sample (ms)
-    EndToEndLatency, // tx to rx latency (ms)
+    EndToEndFrameDelay, // tx to rx latency (ms)
 };
 
 const auto measurement_names = std::map<MeasurementType, std::string>{
     {MeasurementType::FrameRate_Tx, "TxFrameCount"},
     {MeasurementType::FrameRate_Rx, "RxFrameCount"},
     {MeasurementType::EncodeTime, "EncodeTimeInMs"},
-    {MeasurementType::EndToEndLatency, "EndToEndLatencyInMs"},
+    {MeasurementType::EndToEndFrameDelay, "EndToEndFrameDelayInMs"},
 };
 
 ///
@@ -29,7 +29,7 @@ const auto measurement_names = std::map<MeasurementType, std::string>{
 
 struct Measurement {
     virtual ~Measurement() = default;
-    virtual std::string toString() = 0;
+    virtual std::string serialize() = 0;
 };
 
 
@@ -45,11 +45,11 @@ class InfluxMeasurement : public Measurement
 public:
     static std::unique_ptr<InfluxMeasurement> create(std::string name, Tags tags);
 
-    InfluxMeasurement(std::string &name, Tags &tags);
+    InfluxMeasurement(std::string &name_in, Tags &tags_in);
     ~InfluxMeasurement()  = default;
 
     // Measurement - to line protocol
-    std::string toString() override;
+    std::string serialize() override;
 
     struct TimeEntry
     {

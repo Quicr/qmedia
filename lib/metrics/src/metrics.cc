@@ -4,6 +4,7 @@
 #include <chrono>
 #include <iostream>
 #include <string>
+#include <vector>
 
 #include <metrics/metrics.hh>
 #include <metrics/measurements.hh>
@@ -50,10 +51,127 @@ std::shared_ptr<Metrics> Metrics::create(const InfluxConfig& config)
 Metrics::Metrics(CURL* handle_in)
 {
     handle = handle_in;
-    metrics_thread = std::thread(&Metrics::pusher, this);
+    metrics_thread = std::thread(&Metrics::push_loop, this);
     metrics_thread.detach();
 }
 
+Metrics::~Metrics()
+{
+    shutdown = true;
+    if (metrics_thread.joinable()) {
+        metrics_thread.join();
+    }
+
+    curl_global_cleanup();
+}
+
+
+void Metrics::add_measurement(const std::string& name, std::shared_ptr<Measurement> measurement) {
+    measurements.insert(std::pair<std::string, std::shared_ptr<Measurement>>(name, measurement));
+}
+
+void Metrics::sendMetrics(const std::vector<std::string>& collected_metrics)
+{
+    CURLcode res;               // curl response
+    std::string payload;        // accumulated statements
+    long response_code;         // http response code
+
+    //std::cerr << "SendMetrics: count:" << collected_metrics.size() << std::endl;
+
+    // Iterate over the vector of strings
+    for (auto &statement : collected_metrics)
+    {
+        // Concatenate this string to the payload
+        payload += statement;
+    }
+
+    // std::clog << "Points\n" << influx_payload << std::endl;
+    // set the payload, which is a collection of influx statements
+    curl_easy_setopt(
+        handle, CURLOPT_POSTFIELDSIZE_LARGE, payload.size());
+    curl_easy_setopt(handle, CURLOPT_POSTFIELDS, payload.c_str());
+
+    // perform the request
+    res = curl_easy_perform(handle);
+
+    if (res != CURLE_OK) {
+        std::clog << "Unable to post metrics:"
+                  << curl_easy_strerror(res) << std::endl;
+        return;
+    }
+
+    curl_easy_getinfo(handle, CURLINFO_RESPONSE_CODE, &response_code);
+
+    std::cerr << "Metrics write result: " << response_code << std::endl;
+
+    if (response_code < 200 || response_code >= 300)
+    {
+        std::cerr << "Http error posting to influx: " << response_code
+                  << std::endl;
+        return;
+    }
+}
+
+
+void Metrics::emitMetrics()
+{
+    auto collected_metrics = std::vector<std::string>{};
+
+    // Lock the mutex while collecting metrics data
+    std::unique_lock<std::mutex> lock(metrics_mutex);
+
+    for (const auto &[type, measurement] : measurements)
+    {
+        auto points = measurement->serialize();
+
+        if (points.empty())
+        {
+            continue;
+        }
+
+        collected_metrics.emplace_back(points);
+    }
+
+    // release the lock
+    lock.unlock();
+
+    sendMetrics(collected_metrics);
+}
+
+void Metrics::push_loop()
+{
+    constexpr auto period = 1000;
+    std::chrono::time_point<std::chrono::steady_clock> next_time;
+
+    // Lock the mutex before starting work
+    std::unique_lock<std::mutex> lock(metrics_mutex);
+
+    // Initialize then metrics emitter time
+    next_time = std::chrono::steady_clock::now() + std::chrono::milliseconds(period);
+
+    while (!shutdown)
+    {
+        // Wait until alerted
+        cv.wait_until(lock, next_time, [&]() { return shutdown; });
+
+        // Were we told to terminate?
+        if (shutdown) {
+            std::clog << "Metrics is shutdown " << std::flush;
+            break;
+        }
+
+        // unlock the mutex
+        lock.unlock();
+
+        emitMetrics();
+
+        // Re-lock the mutex
+        lock.lock();
+
+        next_time = std::chrono::steady_clock::now() +
+                    std::chrono::milliseconds(period);
+    }
+}
 
 }
 

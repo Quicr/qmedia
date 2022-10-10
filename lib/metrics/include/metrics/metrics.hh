@@ -27,15 +27,17 @@ public:
     // influxdb factory
     static std::shared_ptr<Metrics> create(const InfluxConfig& config);
 
-    void pusher();
-    void push();        // push(std::string & name) - specific push
+    void add_measurement(const std::string& name, std::shared_ptr<Measurement> measurement);
 
-    // created via factory
     Metrics(CURL* handle);
-    ~Metrics() = default;
+    ~Metrics();
+private:
+
+    void emitMetrics();
+    void sendMetrics(const std::vector<std::string>& collected_metrics);
+    void push_loop();
 
     bool shutdown = false;
-    bool push_signals = false;
     std::mutex metrics_mutex;
     std::condition_variable cv;
     std::mutex push_mutex;
