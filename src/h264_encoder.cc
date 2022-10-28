@@ -210,7 +210,7 @@ H264Encoder::encode(const char *input_buffer,
     if (genKeyFrame || idr_frame)
     {
         logger->debug << "h264Encoder:: Force IDR, total_frames_encoded: "
-                     << total_frames_encoded << std::flush;
+                      << total_frames_encoded << std::flush;
         auto ret = encoder->ForceIntraFrame(true);
         logger->debug << "h264Encoder:: IDR Frame Generation Result " << ret
                       << std::flush;

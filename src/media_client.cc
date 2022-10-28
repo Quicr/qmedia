@@ -135,7 +135,8 @@ void MediaClient::do_work()
         auto message = media_transport->recv();
         if (message.data.empty())
         {
-            log->info << "[MediaClient::do_work]: Message data is empty" << std::flush;
+            log->info << "[MediaClient::do_work]: Message data is empty"
+                      << std::flush;
             continue;
         }
 
@@ -144,7 +145,7 @@ void MediaClient::do_work()
         iss >> media_stream_id;
 
         //  Note: since a subscribe should preceed before
-        // data arrive, we should find an entry when
+        // data arrival, we should find an entry when
         // there is data for a given stream
         if (!active_streams.count(media_stream_id))
         {
@@ -156,8 +157,8 @@ void MediaClient::do_work()
         if (message.data.size() > 100)
         {
             log->debug << "[MediaClient::do_work]: got message for "
-                      << media_stream_id << " data:" << message.data.size()
-                      << std::flush;
+                       << media_stream_id << " data:" << message.data.size()
+                       << std::flush;
         }
 
         // hand the data to appropriate media stream
@@ -165,7 +166,6 @@ void MediaClient::do_work()
                                                       message.group_id,
                                                       message.object_id,
                                                       std::move(message.data));
-
     }
 }
 
@@ -173,7 +173,7 @@ int MediaClient::get_audio(MediaStreamId streamId,
                            uint64_t &timestamp,
                            unsigned char **buffer,
                            unsigned int max_len,
-                           void  **to_free)
+                           void **to_free)
 {
     uint32_t recv_length = 0;
     // happens on client thread
@@ -203,7 +203,8 @@ std::uint32_t MediaClient::get_video(MediaStreamId streamId,
     // happens on client thread
     if (!active_streams.count(streamId))
     {
-        log->warning << "[MediaClient::get_video]: media stream inactive" << std::flush;
+        log->warning << "[MediaClient::get_video]: media stream inactive"
+                     << std::flush;
         return 0;
     }
 
@@ -211,7 +212,8 @@ std::uint32_t MediaClient::get_video(MediaStreamId streamId,
         active_streams[streamId]);
 
     MediaConfig config{};
-    recv_length = video_stream->get_media(timestamp, config, buffer, 0, to_free);
+    recv_length = video_stream->get_media(
+        timestamp, config, buffer, 0, to_free);
     width = config.video_max_width;
     height = config.video_max_height;
     format = (uint32_t) config.video_decode_pixel_format;
@@ -224,7 +226,8 @@ void MediaClient::remove_media_stream(MediaStreamId media_stream_id)
     // happens on client thread
     if (!active_streams.count(media_stream_id))
     {
-        log->warning << "[MediaClient::get_video]: media stream inactive" << std::flush;
+        log->warning << "[MediaClient::get_video]: media stream inactive"
+                     << std::flush;
         return;
     }
 
@@ -233,7 +236,7 @@ void MediaClient::remove_media_stream(MediaStreamId media_stream_id)
 
 void MediaClient::release_media_buffer(void *buffer)
 {
-    delete((Packet*) buffer);
+    delete ((Packet *) buffer);
 }
 
 }        // namespace qmedia

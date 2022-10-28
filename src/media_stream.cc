@@ -8,14 +8,15 @@ namespace qmedia
 /// MediaStream
 ///
 
-void MediaStream::handle_media(MediaClient::NewSourceCallback  stream_callback,
+void MediaStream::handle_media(MediaClient::NewSourceCallback stream_callback,
                                uint64_t /*group_id*/,
                                uint64_t /*object_id*/,
                                std::vector<uint8_t> &&data)
 {
     if (data.empty())
     {
-        logger->info << "[MediaStream::handle_media]: empty data " << std::flush;
+        logger->info << "[MediaStream::handle_media]: empty data "
+                     << std::flush;
         return;
     }
 
@@ -24,15 +25,17 @@ void MediaStream::handle_media(MediaClient::NewSourceCallback  stream_callback,
     auto ret = Packet::decode(data, packet.get());
     if (!ret)
     {
-        logger->info << "[MediaStream::handle_media]: packet decoder error " << std::flush;
+        logger->info << "[MediaStream::handle_media]: packet decoder error "
+                     << std::flush;
         return;
     }
 
     uint64_t client_id = packet->clientID;
-    uint64_t source_id= packet->sourceID;
+    uint64_t source_id = packet->sourceID;
     uint64_t source_ts = packet->sourceRecordTime;
     MediaType media_type = MediaType::invalid;
-    switch(packet->mediaType) {
+    switch (packet->mediaType)
+    {
         case Packet::MediaType::H264:
             media_type = MediaType::video;
             break;
@@ -45,11 +48,19 @@ void MediaStream::handle_media(MediaClient::NewSourceCallback  stream_callback,
             media_type = MediaType::invalid;
     }
 
+    auto now_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+                      std::chrono::system_clock::now().time_since_epoch())
+                      .count();
+    std::chrono::milliseconds sent_time(source_ts);
+    logger->info << (int) packet->mediaType << ","
+                 << (now_ms - sent_time.count()) / 1000 << std::flush;
+
     bool new_stream = false;
     auto jitter_instance = JitterFactory::GetJitter(logger, client_id);
     if (jitter_instance == nullptr)
     {
-        logger->warning << "[MediaStream::handle_media]: jitter is null" << std::flush;
+        logger->warning << "[MediaStream::handle_media]: jitter is null"
+                        << std::flush;
         return;
     }
 
@@ -60,12 +71,12 @@ void MediaStream::handle_media(MediaClient::NewSourceCallback  stream_callback,
     {
         stream_callback(client_id, source_id, source_ts, media_type);
     }
-
 }
 
 void MediaStream::remove_stream()
 {
-    if(media_transport) {
+    if (media_transport)
+    {
         media_transport->unregister_stream(id(), media_direction);
     }
 }
@@ -106,7 +117,8 @@ void AudioStream::configure()
     auto jitter = JitterFactory::GetJitter(logger, client_id);
     if (jitter == nullptr)
     {
-        logger->error << "[VideoStream::configure]: jitter is null" << std::flush;
+        logger->error << "[VideoStream::configure]: jitter is null"
+                      << std::flush;
     }
 
     Packet::MediaType packet_media_type = Packet::MediaType::Bad;
@@ -122,7 +134,8 @@ void AudioStream::configure()
             assert(0);
     }
 
-    jitter->set_audio_params(config.sample_rate, config.channels, packet_media_type);
+    jitter->set_audio_params(
+        config.sample_rate, config.channels, packet_media_type);
 }
 
 MediaStreamId AudioStream::id()
@@ -173,15 +186,17 @@ void AudioStream::handle_media(MediaConfig::CodecType codec_type,
 }
 
 size_t AudioStream::get_media(uint64_t &timestamp,
-                              MediaConfig &/*config*/,
+                              MediaConfig & /*config*/,
                               unsigned char **buffer,
                               unsigned int max_len,
-                              void** to_free)
+                              void **to_free)
 {
     int recv_length = 0;
     auto jitter = JitterFactory::GetJitter(logger, client_id);
-    if (jitter == nullptr) {
-        logger->error << "[AudioStream::get_media] Jitter not found" << std::flush;
+    if (jitter == nullptr)
+    {
+        logger->error << "[AudioStream::get_media] Jitter not found"
+                      << std::flush;
         return 0;
     }
 
@@ -192,7 +207,8 @@ size_t AudioStream::get_media(uint64_t &timestamp,
         timestamp = packet->sourceRecordTime;
         *buffer = &packet->data[0];
         recv_length = packet->data.size();
-        logger->debug << "[AudioStream::get_media] recv_length:" << recv_length << std::flush;
+        logger->debug << "[AudioStream::get_media] recv_length:" << recv_length
+                      << std::flush;
         *to_free = packet.release();
     }
 
@@ -203,7 +219,8 @@ size_t AudioStream::get_media(uint64_t &timestamp,
 /// Private
 ///
 
-void AudioStream::audio_encoder_callback(std::vector<uint8_t> &&bytes, uint64_t timestamp)
+void AudioStream::audio_encoder_callback(std::vector<uint8_t> &&bytes,
+                                         uint64_t timestamp)
 {
     static uint64_t group_id = 0;
     static uint64_t object_id = 0;
@@ -230,11 +247,11 @@ void AudioStream::audio_encoder_callback(std::vector<uint8_t> &&bytes, uint64_t 
     }
 
     logger->debug << "MediaStream: " << id()
-                 << " sending audio packet: " << packet->encodedSequenceNum
-                 << ", timestamp " << packet->sourceRecordTime
-                 << std::flush;
+                  << " sending audio packet: " << packet->encodedSequenceNum
+                  << ", timestamp " << packet->sourceRecordTime << std::flush;
 
-    media_transport->send_data(id(), std::move(packet->encoded_data), group_id, object_id);
+    media_transport->send_data(
+        id(), std::move(packet->encoded_data), group_id, object_id);
     group_id += 1;
 }
 
@@ -242,8 +259,10 @@ std::shared_ptr<AudioEncoder> AudioStream::setupAudioEncoder()
 {
     if (encoder == nullptr)
     {
-        auto callback = std::bind(
-            &AudioStream::audio_encoder_callback, this, std::placeholders::_1, std::placeholders::_2);
+        auto callback = std::bind(&AudioStream::audio_encoder_callback,
+                                  this,
+                                  std::placeholders::_1,
+                                  std::placeholders::_2);
         encoder = std::make_shared<AudioEncoder>(config.sample_rate,
                                                  config.channels,
                                                  config.sample_type,

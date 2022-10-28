@@ -21,8 +21,8 @@ enum struct TransportType
 enum MediaType
 {
     invalid = 0,
-    audio   = 1,
-    video   = 2
+    audio = 1,
+    video = 2
 };
 
 struct AudioConfig
@@ -147,7 +147,7 @@ public:
                             unsigned char **buffer,
                             void **to_free);
 
-    void release_media_buffer(void* buffer);
+    void release_media_buffer(void *buffer);
 
 private:
     // Should this be exposed in public header ??
