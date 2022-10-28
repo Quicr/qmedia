@@ -7,8 +7,11 @@
 #include <iomanip>
 
 #include "h264_encoder.hh"
+#include "metrics/metrics.hh"
+#include "metrics/measurements.hh"
 
 using namespace qmedia;
+using namespace metrics;
 
 static bool debug = false;
 
@@ -46,9 +49,13 @@ H264Encoder::H264Encoder(unsigned int video_max_width,
                          unsigned int video_max_frame_rate,
                          unsigned int video_max_bitrate,
                          std::uint32_t video_pixel_format,
-                         const LoggerPointer &logger_in)
+                         const LoggerPointer &logger_in,
+                         uint64_t client_id_in,
+                         uint64_t stream_id_in)
 {
     logger = logger_in;
+    client_id = client_id_in;
+    stream_id = stream_id_in;
     int rv = WelsCreateSVCEncoder(&encoder);
 
     assert(rv == cmResultSuccess && encoder);
@@ -150,9 +157,7 @@ H264Encoder::encode(const char *input_buffer,
     }
 
     auto now = std::chrono::system_clock::now();
-    auto now_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
-                      now.time_since_epoch())
-                      .count();
+    auto now_ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
 
     // nv12 to i420 planar
     auto *input = reinterpret_cast<unsigned char *>(
@@ -262,6 +267,19 @@ H264Encoder::encode(const char *input_buffer,
 
     total_bytes_encoded += output_bitstream.size();
     total_frames_encoded++;
+
+    auto now_2 = std::chrono::system_clock::now();
+    auto now_ms_2 = std::chrono::duration_cast<std::chrono::milliseconds>(now_2.time_since_epoch()).count();
+    auto diff = now_ms - now_ms;
+
+    logger->info << "h264Encoder: encode delta:" << (now_ms_2 - now_ms) << std::flush;
+
+    auto metrics = MetricsFactory::GetInfluxProvider();
+    auto msmt = InfluxMeasurement::create(measurement_names.at(MeasurementType::EncodeTime), {});
+    auto entry = InfluxMeasurement::TimeEntry{{{"clientID", client_id},{"sourceID", stream_id}},
+                                              {{"count", 1}, {"duration", diff}}};
+    msmt->set_time_entry(now_2, std::move(entry));
+    metrics->add_measurement(measurement_names.at(MeasurementType::EncodeTime), msmt);
 
     // success
     return toEncodedFrameType(encodedFrame.eFrameType);

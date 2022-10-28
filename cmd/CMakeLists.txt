@@ -5,7 +5,7 @@
 find_package(portaudio QUIET)
 if(portaudio_FOUND)
     add_executable(sound sound.cc)
-    target_link_libraries(sound PUBLIC qmedia)
+    target_link_libraries(sound PUBLIC metrics qmedia)
 
     if (WIN32)
         target_link_libraries(sound PUBLIC portaudio)

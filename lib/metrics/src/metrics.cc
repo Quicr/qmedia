@@ -12,42 +12,6 @@
 namespace metrics
 {
 
-// factory methods
-std::shared_ptr<Metrics> Metrics::create(const InfluxConfig& config)
-{
-    if (config.url.empty() || config.auth_token.empty())
-    {
-        return nullptr;
-    }
-
-    // manipulate url properties for use with CURL
-    std::string adjusted_url = config.url + "/api/v2/write?org=" + config.org +
-                               "&bucket=" + config.bucket + "&precision=ns";
-
-    std::clog << "influx url:" << adjusted_url << std::endl;
-
-    // initial curl
-    curl_global_init(CURL_GLOBAL_ALL);
-    auto handle = curl_easy_init();
-    curl_easy_setopt(handle, CURLOPT_POST, 1L);
-    curl_easy_setopt(handle, CURLOPT_URL, adjusted_url.c_str());
-    curl_easy_setopt(handle, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
-    struct curl_slist *headerlist = nullptr;
-    std::string token_str = "Authorization: Token " + config.auth_token;
-    headerlist = curl_slist_append(headerlist, token_str.c_str());
-    curl_easy_setopt(handle, CURLOPT_HTTPHEADER, headerlist);
-    curl_easy_setopt(handle, CURLOPT_SSL_VERIFYPEER, 0L);
-    curl_easy_setopt(handle, CURLOPT_SSL_VERIFYHOST, 0L);
-    // do not allow unlimited redirects
-    curl_easy_setopt(handle, CURLOPT_MAXREDIRS, 50L);
-    // enable TCP keep-alive probing
-    curl_easy_setopt(handle, CURLOPT_TCP_KEEPALIVE, 1L);
-    // Start the service thread
-    return std::make_shared<Metrics>(handle);
-
-}
-
-
 Metrics::Metrics(CURL* handle_in)
 {
     handle = handle_in;
@@ -84,6 +48,9 @@ void Metrics::sendMetrics(const std::vector<std::string>& collected_metrics)
         // Concatenate this string to the payload
         payload += statement;
     }
+
+    std::cerr << "[metrics]: " << payload << std::endl;
+
 
     // std::clog << "Points\n" << influx_payload << std::endl;
     // set the payload, which is a collection of influx statements
@@ -171,6 +138,55 @@ void Metrics::push_loop()
         next_time = std::chrono::steady_clock::now() +
                     std::chrono::milliseconds(period);
     }
+}
+
+///
+/// factory
+///
+
+static const std::string influx_url = "";
+static const std::string influx_auth_token = "";
+static const std::string influx_org = "";
+static const std::string influx_bucket = "";
+
+std::map<MetricProvider, std::shared_ptr<Metrics>> MetricsFactory::metric_providers = {};
+
+// factory methods
+std::shared_ptr<Metrics> MetricsFactory::GetInfluxProvider()
+{
+    if (metric_providers.count(MetricProvider::influx) > 0) {
+        return metric_providers[MetricProvider::influx];
+    }
+
+    if (influx_url.empty() || influx_auth_token.empty())
+    {
+        return nullptr;
+    }
+
+    // manipulate url properties for use with CURL
+    std::string adjusted_url = influx_url + "/api/v2/write?org=" + influx_org +
+                               "&bucket=" + influx_bucket + "&precision=ns";
+
+    std::clog << "influx url:" << adjusted_url << std::endl;
+
+    // initial curl
+    curl_global_init(CURL_GLOBAL_ALL);
+    auto handle = curl_easy_init();
+    curl_easy_setopt(handle, CURLOPT_POST, 1L);
+    curl_easy_setopt(handle, CURLOPT_URL, adjusted_url.c_str());
+    curl_easy_setopt(handle, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
+    struct curl_slist *headerlist = nullptr;
+    std::string token_str = "Authorization: Token " + influx_auth_token;
+    headerlist = curl_slist_append(headerlist, token_str.c_str());
+    curl_easy_setopt(handle, CURLOPT_HTTPHEADER, headerlist);
+    curl_easy_setopt(handle, CURLOPT_SSL_VERIFYPEER, 0L);
+    curl_easy_setopt(handle, CURLOPT_SSL_VERIFYHOST, 0L);
+    // do not allow unlimited redirects
+    curl_easy_setopt(handle, CURLOPT_MAXREDIRS, 50L);
+    // enable TCP keep-alive probing
+    curl_easy_setopt(handle, CURLOPT_TCP_KEEPALIVE, 1L);
+    metric_providers[MetricProvider::influx] = std::make_shared<Metrics>(handle);
+    return metric_providers[MetricProvider::influx];
 }
 
 }

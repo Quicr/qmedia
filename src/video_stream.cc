@@ -29,7 +29,9 @@ void VideoStream::configure()
                 config.video_max_frame_rate,
                 config.video_max_bitrate,
                 (uint32_t) config.video_encode_pixel_format,
-                logger);
+                logger,
+                client_id,
+                id());
 
             if (!encoder)
             {

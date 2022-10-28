@@ -43,7 +43,7 @@ using TimePoint = std::pair<long long, Fields>;
 class InfluxMeasurement : public Measurement
 {
 public:
-    static std::unique_ptr<InfluxMeasurement> create(std::string name, Tags tags);
+    static std::shared_ptr<InfluxMeasurement> create(std::string name, Tags tags);
 
     InfluxMeasurement(std::string &name_in, Tags &tags_in);
     ~InfluxMeasurement()  = default;

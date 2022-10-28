@@ -19,7 +19,9 @@ public:
                 unsigned int video_max_frame_rate,
                 unsigned int video_max_bitrate,
                 std::uint32_t video_pixel_format,
-                const LoggerPointer &logger);
+                const LoggerPointer &logger,
+                uint64_t client_id,
+                uint64_t stream_id);
 
     ~H264Encoder();
 
@@ -48,5 +50,7 @@ public:
     SFrameBSInfo encodedFrame;
     SSourcePicture inputFrame;
     LoggerPointer logger;
+    uint64_t client_id {0};
+    uint64_t stream_id {0};
 };
 }        // namespace qmedia

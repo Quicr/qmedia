@@ -5,13 +5,14 @@
 #include <functional>
 
 #include <qmedia/media_client.hh>
+#include <metrics/metrics.hh>
+
 #include "media_transport.hh"
 
 #include "audio_encoder.hh"
 #include "codec.hh"
 #include "names.hh"
 #include "jitter.hh"
-#include "metrics.hh"
 
 namespace qmedia
 {
@@ -31,7 +32,9 @@ public:
         config(config_in),
         logger(logger_in)
     {
+        metrics = metrics::MetricsFactory::GetInfluxProvider();
     }
+
 
     virtual ~MediaStream() = default;
 
@@ -61,7 +64,6 @@ public:
 
 protected:
     std::atomic<bool> mutedAudioEmptyFrames = false;
-
     uint64_t domain = 0;
     uint64_t conference_id = 0;
     uint64_t client_id = 0;
@@ -70,7 +72,7 @@ protected:
     MediaConfig::MediaDirection media_direction;
     std::shared_ptr<MediaTransport> media_transport;
     LoggerPointer logger;
-    Metrics::MetricsPtr metrics = nullptr;
+    std::shared_ptr<metrics::Metrics> metrics = nullptr;
 };
 
 struct AudioStream : public MediaStream

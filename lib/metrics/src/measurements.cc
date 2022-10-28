@@ -4,9 +4,9 @@
 namespace metrics
 {
 
-std::unique_ptr<InfluxMeasurement> InfluxMeasurement::create(std::string name, Tags tags)
+std::shared_ptr<InfluxMeasurement> InfluxMeasurement::create(std::string name, Tags tags)
 {
-        return std::make_unique<InfluxMeasurement>(name, tags);
+        return std::make_shared<InfluxMeasurement>(name, tags);
 }
 
 InfluxMeasurement::InfluxMeasurement(std::string &name_in, Tags &tags_in) :

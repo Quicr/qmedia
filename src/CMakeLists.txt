@@ -19,9 +19,11 @@ add_library(qmedia
     resampler.cc
     video_stream.cc)
 target_link_directories(qmedia PUBLIC ${OpenH264_LIB_DIR})
+add_dependencies(qmedia metrics)
 target_link_libraries(qmedia
     PUBLIC
         ${LIBRARIES}
+        metrics
         OpenSSL::Crypto
         openh264
         quicr)
