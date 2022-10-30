@@ -24,7 +24,7 @@ struct InfluxConfig
 class Metrics
 {
 public:
-    void add_measurement(const std::string& name, std::shared_ptr<Measurement> measurement);
+    void add_measurement(std::shared_ptr<Measurement> measurement);
     Metrics(CURL* handle);
     ~Metrics();
 private:
@@ -38,7 +38,7 @@ private:
     std::mutex metrics_mutex;
     std::condition_variable cv;
     std::thread metrics_thread;
-    std::map<std::string, std::shared_ptr<Measurement>> measurements;
+    std::list<std::shared_ptr<Measurement>> measurements;
     // TODO: make it RAII
     CURL *handle;
 };

@@ -94,6 +94,7 @@ public:
         void(const uint64_t, const uint64_t, const uint64_t, const MediaType)>;
 
     explicit MediaClient(NewSourceCallback stream_callback,
+                         uint64_t client_id,
                          const LoggerPointer &s = nullptr);
 
     // configure transport for this client
@@ -169,6 +170,9 @@ private:
 
     // underlying media transport
     std::shared_ptr<MediaTransport> media_transport;
+
+    // client instance id
+    uint64_t client_id {0};
 };
 
 }        // namespace qmedia

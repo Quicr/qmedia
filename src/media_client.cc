@@ -5,15 +5,19 @@
 #include "media_transport.hh"
 #include "media_stream.hh"
 #include "packet.hh"
+#include "metrics_reporter.hh"
 
 namespace qmedia
 {
 
 MediaClient::MediaClient(NewSourceCallback stream_callback,
+                         std::uint64_t client_id_in,
                          const LoggerPointer &parent_logger) :
     new_stream_callback(stream_callback),
-    log(std::make_shared<Logger>("qmedia", parent_logger))
+    log(std::make_shared<Logger>("qmedia", parent_logger)),
+    client_id(client_id_in)
 {
+    MetricsReporter::client_id = client_id;
 }
 
 void MediaClient::init_transport(TransportType /*transport_type*/,

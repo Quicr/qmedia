@@ -26,7 +26,7 @@ extern "C"
                                         NewStreamCallback stream_callback,
                                         const char *remote_address,
                                         std::uint16_t remote_port,
-
+                                        std::uint64_t client_id,
                                         void **media_client);
 
     EXPORT void CALL MediaClient_Destroy(void *media_client);

@@ -324,7 +324,7 @@ int main(int argc, char *argv[])
     };
 
     // Create media library.
-    auto client = MediaClient{wrapped_stream_callback, logger};
+    auto client = MediaClient{wrapped_stream_callback, static_cast<uint64_t>(clientID), logger};
 
     client.init_transport(TransportType::QUIC, remote_address, remote_port);
 

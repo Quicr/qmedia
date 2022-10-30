@@ -13,11 +13,11 @@ struct Constants {
     struct NEO_MEDIA {
 
         // NeoMediaInstance Init parameters.
-        static let sfu = "127.0.0.1" //"18.191.247.162" //"13.56.164.43"//"127.0.0.1" // "54.201.7.152" // "18.236.63.86"
-        static let port = UInt16(7777)
+        static let sfu = "relay.us-east-2.quicr.ctgpoc.com" //127.0.0.1" //"18.191.247.162" //"13.56.164.43"//"127.0.0.1" // "54.201.7.152" // "18.236.63.86"
+        static let port = UInt16(15004)
         static let domainId =  UInt64(1000)
         static let confernceId =  UInt64(2000)
-        static let clientId = UInt64(3000)
+        static let clientId = UInt64(Int.random(in: 1000 ... 999999))
         static let transport = UInt16(0)  // 0=QUICR
         static let video_supported = true;
         

@@ -34,6 +34,6 @@ void MetricsReporter::Report(qmedia::MediaStreamId stream_id,
     }
 
     msmt->set_time_entry(std::chrono::system_clock::now(), std::move(entry));
-    metrics->add_measurement(MeasurementNames.at(MeasurementType::EncodeTime), msmt);
+    metrics->add_measurement( msmt);
 }
 

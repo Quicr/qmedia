@@ -41,11 +41,9 @@ Metrics::~Metrics()
 }
 
 
-void Metrics::add_measurement(const std::string& name, std::shared_ptr<Measurement> measurement) {
-    if (measurements.count(name) > 0) {
-        return;
-    }
-    measurements.insert(std::pair<std::string, std::shared_ptr<Measurement>>(name, measurement));
+void Metrics::add_measurement(std::shared_ptr<Measurement> measurement) {
+    std::unique_lock<std::mutex> lock(metrics_mutex);
+    measurements.push_back(measurement);
 }
 
 ///
@@ -58,7 +56,7 @@ void Metrics::sendMetrics(const std::vector<std::string>& collected_metrics)
     std::string payload;        // accumulated statements
     long response_code;         // http response code
 
-    //std::cerr << "SendMetrics: count:" << collected_metrics.size() << std::endl;
+    std::cerr << "[SendMetrics]: count:" << collected_metrics.size() << std::endl;
 
     // Iterate over the vector of strings
     for (auto &statement : collected_metrics)
@@ -67,7 +65,7 @@ void Metrics::sendMetrics(const std::vector<std::string>& collected_metrics)
         payload += statement;
     }
 
-    std::cerr << "[metrics]: " << payload << std::endl;
+    std::cerr << "[SendMetrics]: Payload: " << payload << std::endl;
 
 
     curl_easy_setopt(
@@ -103,7 +101,7 @@ void Metrics::emitMetrics()
     // Lock the mutex while collecting metrics data
     std::unique_lock<std::mutex> lock(metrics_mutex);
 
-    for (const auto &[type, measurement] : measurements)
+    for (const auto measurement : measurements)
     {
         auto points = measurement->serialize();
 
@@ -173,9 +171,10 @@ std::shared_ptr<Metrics> MetricsFactory::GetInfluxProvider()
         return metric_providers[MetricProvider::influx];
     }
 
-    auto influx_url = get_env_var(INFLUX_URL);
-    auto influx_auth_token = get_env_var(INFLUX_AUTH_TOKEN);
-
+    //auto influx_url = get_env_var(INFLUX_URL);
+    //auto influx_auth_token = get_env_var(INFLUX_AUTH_TOKEN);
+    auto influx_url = std::string{"http://relay.us-east-2.quicr.ctgpoc.com:8086"};
+    auto influx_auth_token = std::string{"cisco-cto-media10x"};
     if (influx_url.empty() || influx_auth_token.empty())
     {
         return nullptr;
