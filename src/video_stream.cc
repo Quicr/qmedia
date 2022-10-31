@@ -7,9 +7,10 @@ namespace qmedia
 VideoStream::VideoStream(uint64_t domain,
                          uint64_t conference_id,
                          uint64_t client_id,
+                         uint64_t stream_name,
                          const MediaConfig &media_config,
                          LoggerPointer logger_in) :
-    MediaStream(domain, conference_id, client_id, media_config, logger_in)
+    MediaStream(domain, conference_id, client_id, stream_name, media_config, logger_in)
 {
 }
 
@@ -47,7 +48,7 @@ void VideoStream::configure()
             assert("Invalid media direction");
     }
 
-    auto jitter =  JitterFactory::GetJitter(logger, client_id);
+    auto jitter =  JitterFactory::GetJitter(logger, stream_name);
     if (jitter == nullptr)
     {
         logger->error << "[VideoStream::configure]: jitter is null" << std::flush;
@@ -65,13 +66,16 @@ MediaStreamId VideoStream::id()
         return media_stream_id;
     }
 
-    auto name = QuicrName::name_for_client(domain, conference_id, client_id);
+    auto name = QuicrName::name_for_client(domain, conference_id, stream_name);
     auto quality_id = "video/" + std::to_string((int) config.media_codec) +
                       "/" + std::to_string(config.video_max_frame_rate) + "/" +
                       std::to_string(config.video_max_bitrate);
     name += quality_id;
+    logger->info << "Video MediaStream FQDN:" << name << std::flush;
     std::hash<std::string> hasher;
     media_stream_id = hasher(name);
+    logger->info << "Video MediaStream ID:" << media_stream_id << std::flush;
+
     return media_stream_id;
 }
 
@@ -144,7 +148,7 @@ size_t VideoStream::get_media(uint64_t &timestamp,
 {
     size_t recv_length = 0;
 
-    auto jitter = JitterFactory::GetJitter(logger, client_id);
+    auto jitter = JitterFactory::GetJitter(logger, stream_name);
     if (jitter == nullptr)
     {
         logger->warning << "[VideoStream::get_media]: jitter is nullptr"
@@ -213,7 +217,7 @@ PacketPointer VideoStream::encode_h264(uint8_t *buffer,
                              VideoEncoder::EncodedFrameType::IDR;
 
     packet->data = std::move(output);
-    packet->clientID = client_id;
+    packet->clientID = stream_name;
     // todo : fix this to not be hardcoded
     packet->mediaType = Packet::MediaType::H264;
     packet->sourceID = id();        // same as streamId

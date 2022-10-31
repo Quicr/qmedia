@@ -23,11 +23,13 @@ public:
     explicit MediaStream(uint64_t domain_in,
                          uint64_t conference_id_in,
                          uint64_t client_id_in,
+                         uint64_t stream_name_in,
                          const MediaConfig &config_in,
                          LoggerPointer logger_in) :
         domain(domain_in),
         conference_id(conference_id_in),
         client_id(client_id_in),
+        stream_name(stream_name_in),
         config(config_in),
         logger(logger_in)
     {}
@@ -64,6 +66,7 @@ protected:
     uint64_t domain = 0;
     uint64_t conference_id = 0;
     uint64_t client_id = 0;
+    uint64_t stream_name = 0;
     MediaStreamId media_stream_id = 0;
     MediaConfig config;
     MediaConfig::MediaDirection media_direction;
@@ -77,6 +80,7 @@ struct AudioStream : public MediaStream
     explicit AudioStream(uint64_t domain,
                          uint64_t conference_id,
                          uint64_t client_id,
+                         uint64_t stream_name,
                          const MediaConfig &media_config,
                          LoggerPointer logger_in);
     ~AudioStream() = default;
@@ -105,6 +109,7 @@ struct VideoStream : public MediaStream
     explicit VideoStream(uint64_t domain,
                          uint64_t conference_id,
                          uint64_t client_id,
+                         uint64_t stream_name,
                          const MediaConfig &media_config,
                          LoggerPointer logger_in);
     ~VideoStream() = default;
@@ -146,11 +151,12 @@ struct MediaStreamFactory
     create_audio_stream(uint64_t domain,
                         uint64_t conference_id,
                         uint64_t client_id,
+                        uint64_t stream_name,
                         const MediaConfig &media_config,
                         LoggerPointer logger_in)
     {
         auto stream = std::make_shared<AudioStream>(
-            domain, conference_id, client_id, media_config, logger_in);
+            domain, conference_id, client_id, stream_name, media_config, logger_in);
         stream->configure();
         return stream;
     }
@@ -159,11 +165,12 @@ struct MediaStreamFactory
     create_video_stream(uint64_t domain,
                         uint64_t conference_id,
                         uint64_t client_id,
+                        uint64_t stream_name,
                         const MediaConfig &media_config,
                         LoggerPointer logger)
     {
         auto stream = std::make_shared<VideoStream>(
-            domain, conference_id, client_id, media_config, logger);
+            domain, conference_id, client_id, stream_name, media_config, logger);
         stream->configure();
         return stream;
     }

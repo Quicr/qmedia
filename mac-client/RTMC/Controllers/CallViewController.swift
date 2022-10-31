@@ -113,23 +113,23 @@ class CallViewController: NSViewController {
 
                  print("PubUrl: \(publishName as String)")
                  // audio - opus
-                   pub_audio_stream_id = MediaClient_AddAudioStream(media_client, Constants.NEO_MEDIA.domainId, Constants.NEO_MEDIA.confernceId, Constants.NEO_MEDIA.clientId, 0, Constants.NEO_MEDIA.AUDIO.sampleType, Constants.NEO_MEDIA.AUDIO.sampleRate, Constants.NEO_MEDIA.AUDIO.audioChannels)
+                   pub_audio_stream_id = MediaClient_AddAudioStream(media_client, Constants.NEO_MEDIA.domainId, Constants.NEO_MEDIA.confernceId, UInt64(pubname_int), 0, Constants.NEO_MEDIA.AUDIO.sampleType, Constants.NEO_MEDIA.AUDIO.sampleRate, Constants.NEO_MEDIA.AUDIO.audioChannels)
                  print("quicr: Audio Pub StreamId \(pub_audio_stream_id)")
                  
                  // video
-                 pub_video_stream_id = MediaClient_AddVideoStream(media_client, Constants.NEO_MEDIA.domainId, Constants.NEO_MEDIA.confernceId, Constants.NEO_MEDIA.clientId, 0, UInt8(Constants.NEO_MEDIA.VIDEO.enc_pixel_format), UInt32(Constants.NEO_MEDIA.VIDEO.max_width), Constants.NEO_MEDIA.VIDEO.max_height, UInt32(Constants.NEO_MEDIA.VIDEO.max_frame_rate), Constants.NEO_MEDIA.VIDEO.max_bitrate)
+                 pub_video_stream_id = MediaClient_AddVideoStream(media_client, Constants.NEO_MEDIA.domainId, Constants.NEO_MEDIA.confernceId, UInt64(pubname_int), 0, UInt8(Constants.NEO_MEDIA.VIDEO.enc_pixel_format), UInt32(Constants.NEO_MEDIA.VIDEO.max_width), Constants.NEO_MEDIA.VIDEO.max_height, UInt32(Constants.NEO_MEDIA.VIDEO.max_frame_rate), Constants.NEO_MEDIA.VIDEO.max_bitrate)
                  print("quicr: Video Pub StreamId \(pub_video_stream_id)")
                  
               } else if mediaDirection == Constants.NEO_MEDIA.MediaDirection.subscribe {
                 
               
                 // audio - opus
-                sub_audio_stream_id = MediaClient_AddAudioStream(media_client, Constants.NEO_MEDIA.domainId, Constants.NEO_MEDIA.confernceId, Constants.NEO_MEDIA.clientId, 1, Constants.NEO_MEDIA.AUDIO.sampleType, Constants.NEO_MEDIA.AUDIO.sampleRate, Constants.NEO_MEDIA.AUDIO.audioChannels)
+                sub_audio_stream_id = MediaClient_AddAudioStream(media_client, Constants.NEO_MEDIA.domainId, Constants.NEO_MEDIA.confernceId, UInt64(subname_int), 1, Constants.NEO_MEDIA.AUDIO.sampleType, Constants.NEO_MEDIA.AUDIO.sampleRate, Constants.NEO_MEDIA.AUDIO.audioChannels)
                
                 print("quicr: Audio Sub StreamId \(sub_audio_stream_id)")
                 
                 // video - h264
-                sub_video_stream_id = MediaClient_AddVideoStream(media_client, Constants.NEO_MEDIA.domainId, Constants.NEO_MEDIA.confernceId, Constants.NEO_MEDIA.clientId, 1, UInt8(Constants.NEO_MEDIA.VIDEO.dec_pixel_format), UInt32(Constants.NEO_MEDIA.VIDEO.max_width), Constants.NEO_MEDIA.VIDEO.max_height, UInt32(Constants.NEO_MEDIA.VIDEO.max_frame_rate), Constants.NEO_MEDIA.VIDEO.max_bitrate)
+                sub_video_stream_id = MediaClient_AddVideoStream(media_client, Constants.NEO_MEDIA.domainId, Constants.NEO_MEDIA.confernceId, UInt64(subname_int), 1, UInt8(Constants.NEO_MEDIA.VIDEO.dec_pixel_format), UInt32(Constants.NEO_MEDIA.VIDEO.max_width), Constants.NEO_MEDIA.VIDEO.max_height, UInt32(Constants.NEO_MEDIA.VIDEO.max_frame_rate), Constants.NEO_MEDIA.VIDEO.max_bitrate)
                 print("quicr: Video Sub StreamId \(sub_video_stream_id)")
                 
               } else {
@@ -137,21 +137,21 @@ class CallViewController: NSViewController {
                 
                 print("PubUrl: \(publishName as String)")
                 // audio - opus
-                pub_audio_stream_id = MediaClient_AddAudioStream(media_client, Constants.NEO_MEDIA.domainId, Constants.NEO_MEDIA.confernceId, Constants.NEO_MEDIA.clientId, 0, Constants.NEO_MEDIA.AUDIO.sampleType, Constants.NEO_MEDIA.AUDIO.sampleRate, Constants.NEO_MEDIA.AUDIO.audioChannels)
+                pub_audio_stream_id = MediaClient_AddAudioStream(media_client, Constants.NEO_MEDIA.domainId, Constants.NEO_MEDIA.confernceId, UInt64(pubname_int), 0, Constants.NEO_MEDIA.AUDIO.sampleType, Constants.NEO_MEDIA.AUDIO.sampleRate, Constants.NEO_MEDIA.AUDIO.audioChannels)
                 print("quicr: Audio Pub StreamId \(pub_audio_stream_id)")
                 
                 // video
-                pub_video_stream_id = MediaClient_AddVideoStream(media_client, Constants.NEO_MEDIA.domainId, Constants.NEO_MEDIA.confernceId, Constants.NEO_MEDIA.clientId, 0, UInt8(Constants.NEO_MEDIA.VIDEO.enc_pixel_format), UInt32(Constants.NEO_MEDIA.VIDEO.max_width), Constants.NEO_MEDIA.VIDEO.max_height, UInt32(Constants.NEO_MEDIA.VIDEO.max_frame_rate), Constants.NEO_MEDIA.VIDEO.max_bitrate)
+                pub_video_stream_id = MediaClient_AddVideoStream(media_client, Constants.NEO_MEDIA.domainId, Constants.NEO_MEDIA.confernceId, UInt64(pubname_int), 0, UInt8(Constants.NEO_MEDIA.VIDEO.enc_pixel_format), UInt32(Constants.NEO_MEDIA.VIDEO.max_width), Constants.NEO_MEDIA.VIDEO.max_height, UInt32(Constants.NEO_MEDIA.VIDEO.max_frame_rate), Constants.NEO_MEDIA.VIDEO.max_bitrate)
                 print("quicr: Video Pub StreamId \(pub_video_stream_id)")
                 
                 // sub a/v
                 // audio - opus
-                sub_audio_stream_id = MediaClient_AddAudioStream(media_client, Constants.NEO_MEDIA.domainId, Constants.NEO_MEDIA.confernceId, Constants.NEO_MEDIA.clientId, 1, Constants.NEO_MEDIA.AUDIO.sampleType, Constants.NEO_MEDIA.AUDIO.sampleRate, Constants.NEO_MEDIA.AUDIO.audioChannels)
+                sub_audio_stream_id = MediaClient_AddAudioStream(media_client, Constants.NEO_MEDIA.domainId, Constants.NEO_MEDIA.confernceId, UInt64(subname_int), 1, Constants.NEO_MEDIA.AUDIO.sampleType, Constants.NEO_MEDIA.AUDIO.sampleRate, Constants.NEO_MEDIA.AUDIO.audioChannels)
                
                 print("quicr: Audio Sub StreamId \(sub_audio_stream_id)")
                 
                 // video - h264
-                sub_video_stream_id = MediaClient_AddVideoStream(media_client, Constants.NEO_MEDIA.domainId, Constants.NEO_MEDIA.confernceId, Constants.NEO_MEDIA.clientId, 1, UInt8(Constants.NEO_MEDIA.VIDEO.dec_pixel_format), UInt32(Constants.NEO_MEDIA.VIDEO.max_width), Constants.NEO_MEDIA.VIDEO.max_height, UInt32(Constants.NEO_MEDIA.VIDEO.max_frame_rate), Constants.NEO_MEDIA.VIDEO.max_bitrate)
+                sub_video_stream_id = MediaClient_AddVideoStream(media_client, Constants.NEO_MEDIA.domainId, Constants.NEO_MEDIA.confernceId, UInt64(subname_int), 1, UInt8(Constants.NEO_MEDIA.VIDEO.dec_pixel_format), UInt32(Constants.NEO_MEDIA.VIDEO.max_width), Constants.NEO_MEDIA.VIDEO.max_height, UInt32(Constants.NEO_MEDIA.VIDEO.max_frame_rate), Constants.NEO_MEDIA.VIDEO.max_bitrate)
                 print("quicr: Video Sub StreamId \(sub_video_stream_id)")
               
               }

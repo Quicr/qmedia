@@ -32,12 +32,12 @@ void MediaClient::init_transport(TransportType /*transport_type*/,
 
 MediaStreamId MediaClient::add_audio_stream(uint64_t domain,
                                             uint64_t conference_id,
-                                            uint64_t client_id,
+                                            uint64_t stream_name,
                                             const MediaConfig &media_config)
 {
     // create a new media stream and associate the transport
     auto media_stream = MediaStreamFactory::create_audio_stream(
-        domain, conference_id, client_id, media_config, log);
+        domain, conference_id, client_id, stream_name, media_config, log);
 
     log->info << "[MediaClient::add_audio_stream]: created: "
               << media_stream->id() << std::flush;
@@ -51,12 +51,12 @@ MediaStreamId MediaClient::add_audio_stream(uint64_t domain,
 
 MediaStreamId MediaClient::add_video_stream(uint64_t domain,
                                             uint64_t conference_id,
-                                            uint64_t client_id,
+                                            uint64_t stream_name,
                                             const MediaConfig &media_config)
 {
     // create a new media stream and associate the transport
     auto media_stream = MediaStreamFactory::create_video_stream(
-        domain, conference_id, client_id, media_config, log);
+        domain, conference_id, client_id, stream_name, media_config, log);
 
     log->info << "[MediaClient::add_video_stream]: created: "
               << media_stream->id() << std::flush;
@@ -148,7 +148,7 @@ void MediaClient::do_work()
         iss >> media_stream_id;
 
         //  Note: since a subscribe should preceed before
-        // data arrive, we should find an entry when
+        // data arrival, we should find an entry when
         // there is data for a given stream
         if (!active_streams.count(media_stream_id))
         {
@@ -157,7 +157,7 @@ void MediaClient::do_work()
             continue;
         }
 
-        if (message.data.size() > 100)
+        if (message.data.size() > 0)
         {
             log->debug << "[MediaClient::do_work]: got message for "
                       << media_stream_id << " data:" << message.data.size()

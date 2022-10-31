@@ -48,7 +48,7 @@ extern "C"
     std::uint64_t CALL MediaClient_AddAudioStream(void *instance,
                                                   std::uint64_t domain,
                                                   std::uint64_t conference_id,
-                                                  std::uint64_t client_id,
+                                                  std::uint64_t stream_name,
                                                   std::uint8_t media_direction,
                                                   std::uint8_t sample_type,
                                                   std::uint16_t sample_rate,
@@ -66,14 +66,14 @@ extern "C"
         config.sample_rate = sample_rate;
         config.channels = channels;
         return media_client->add_audio_stream(
-            domain, conference_id, client_id, config);
+            domain, conference_id, stream_name, config);
     }
 
     std::uint64_t CALL
     MediaClient_AddVideoStream(void *instance,
                                std::uint64_t domain,
                                std::uint64_t conference_id,
-                               std::uint64_t client_id,
+                               std::uint64_t stream_name,
                                std::uint8_t media_direction,
                                std::uint8_t pixel_format,
                                std::uint32_t video_max_width,
@@ -112,7 +112,7 @@ extern "C"
         config.video_max_frame_rate = video_max_frame_rate;
 
         return media_client->add_video_stream(
-            domain, conference_id, client_id, config);
+            domain, conference_id, stream_name, config);
     }
 
     void CALL MediaClient_RemoveMediaStream(void *instance,

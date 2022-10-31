@@ -105,12 +105,12 @@ public:
     // Stream API
     MediaStreamId add_audio_stream(uint64_t domain,
                                    uint64_t conference_id,
-                                   uint64_t client_id,
+                                   uint64_t stream_name,
                                    const MediaConfig &media_config);
 
     MediaStreamId add_video_stream(uint64_t domain,
                                    uint64_t conference_id,
-                                   uint64_t client_id,
+                                   uint64_t stream_name,
                                    const MediaConfig &media_config);
 
     void remove_media_stream(MediaStreamId media_stream_id);

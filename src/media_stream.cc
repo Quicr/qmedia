@@ -76,9 +76,10 @@ void MediaStream::remove_stream()
 AudioStream::AudioStream(uint64_t domain,
                          uint64_t conference_id,
                          uint64_t client_id,
+                         uint64_t stream_name,
                          const MediaConfig &media_config,
                          LoggerPointer logger_in) :
-    MediaStream(domain, conference_id, client_id, media_config, logger_in)
+    MediaStream(domain, conference_id, client_id, stream_name, media_config, logger_in)
 {
 }
 
@@ -103,7 +104,7 @@ void AudioStream::configure()
     }
 
     // setup jitters
-    auto jitter = JitterFactory::GetJitter(logger, client_id);
+    auto jitter = JitterFactory::GetJitter(logger, stream_name);
     if (jitter == nullptr)
     {
         logger->error << "[VideoStream::configure]: jitter is null" << std::flush;
@@ -132,13 +133,15 @@ MediaStreamId AudioStream::id()
         return media_stream_id;
     }
 
-    auto name = QuicrName::name_for_client(domain, conference_id, client_id);
+    auto name = QuicrName::name_for_client(domain, conference_id, stream_name);
     auto quality_id = "audio/" + std::to_string((int) config.media_codec) +
                       "/" + std::to_string(config.sample_rate) + "/" +
                       std::to_string(config.channels);
     name += quality_id;
+    logger->info << "Audio MediaStream FQDN:" << name << std::flush;
     std::hash<std::string> hasher;
     media_stream_id = hasher(name);
+    logger->info << "Audio MediaStream ID:" << media_stream_id << std::flush;
     return media_stream_id;
 }
 
@@ -179,7 +182,7 @@ size_t AudioStream::get_media(uint64_t &timestamp,
                               void** to_free)
 {
     int recv_length = 0;
-    auto jitter = JitterFactory::GetJitter(logger, client_id);
+    auto jitter = JitterFactory::GetJitter(logger, stream_name);
     if (jitter == nullptr) {
         logger->error << "[AudioStream::get_media] Jitter not found" << std::flush;
         return 0;
@@ -216,7 +219,7 @@ void AudioStream::audio_encoder_callback(std::vector<uint8_t> &&bytes, uint64_t 
 
     auto packet = std::make_unique<Packet>();
     packet->data = std::move(bytes);
-    packet->clientID = client_id;
+    packet->clientID = stream_name;
     packet->sourceRecordTime = timestamp;
     packet->mediaType = Packet::MediaType::Opus;
     packet->sourceID = id();        // same as streamId
