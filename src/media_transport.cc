@@ -61,6 +61,7 @@ void Delegate::log(quicr::LogLevel /*level*/, const std::string &message)
 
 QuicRMediaTransport::QuicRMediaTransport(const std::string &server_ip,
                                const uint16_t port,
+                               bool cc_status,
                                LoggerPointer logger_in) :
     delegate(this),
     qr_client(delegate, server_ip, port), logger(logger_in)
@@ -69,10 +70,11 @@ QuicRMediaTransport::QuicRMediaTransport(const std::string &server_ip,
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
+
     logger->info << "[MediaTransport]: Transport Created" << std::flush;
     delegate.set_logger(logger);
-
-    qr_client.set_congestion_control_status(false);
+    logger->info << "[MediaTransport]: Transport CC Status "  << cc_status << std::flush;
+    qr_client.set_congestion_control_status(cc_status);
 }
 
 void QuicRMediaTransport::register_stream(uint64_t id,

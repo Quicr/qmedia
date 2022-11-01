@@ -100,7 +100,8 @@ public:
     // configure transport for this client
     void init_transport(TransportType transport_type,
                         const std::string &remote_address,
-                        unsigned int remote_port);
+                        unsigned int remote_port,
+                        bool cc_status);
 
     // Stream API
     MediaStreamId add_audio_stream(uint64_t domain,

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="20037" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="XfG-lQ-9wD">
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="21507" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="XfG-lQ-9wD">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="20037"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="21507"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -719,14 +719,14 @@
                                     <action selector="didSelectVideoSource:" target="XfG-lQ-9wD" id="N1t-pw-StE"/>
                                 </connections>
                             </popUpButton>
-                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="fHN-Xg-hcr">
-                                <rect key="frame" x="916" y="679" width="86" height="18"/>
-                                <buttonCell key="cell" type="check" title="Loopback" bezelStyle="regularSquare" imagePosition="left" inset="2" id="B0O-Oy-w96">
+                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="fHN-Xg-hcr" userLabel="Congestion Control Checkbox">
+                                <rect key="frame" x="891" y="679" width="137" height="18"/>
+                                <buttonCell key="cell" type="check" title="CC (Experimental)" bezelStyle="regularSquare" imagePosition="left" inset="2" id="B0O-Oy-w96">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
                                 </buttonCell>
                                 <connections>
-                                    <action selector="didToggleLoopbackCheckbox:" target="XfG-lQ-9wD" id="ZD0-Ph-ZBr"/>
+                                    <action selector="didToggleCongestionControlCheckbox:" target="XfG-lQ-9wD" id="Drb-dy-b8G"/>
                                 </connections>
                             </button>
                             <popUpButton verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="9Sd-D6-ycj">
@@ -818,8 +818,8 @@
                     <connections>
                         <outlet property="audioSourcePullDown" destination="19c-5u-dcu" id="i2J-iI-Yqq"/>
                         <outlet property="conferenceTextField" destination="MfT-03-4yg" id="QHT-Cf-kZ9"/>
+                        <outlet property="congestionControlCheckbox" destination="fHN-Xg-hcr" id="arg-cy-WXv"/>
                         <outlet property="joinButton" destination="HQ1-vW-n4d" id="HNf-ba-TNu"/>
-                        <outlet property="loopbackCheckbox" destination="fHN-Xg-hcr" id="aco-Iy-yrp"/>
                         <outlet property="loopbackModePullDown" destination="9Sd-D6-ycj" id="F8o-u0-lNY"/>
                         <outlet property="mediaDirectionPullDown" destination="6YB-xd-DTg" id="IFI-io-ssN"/>
                         <outlet property="publishNameTextField" destination="MfT-03-4yg" id="hoR-wP-bsa"/>

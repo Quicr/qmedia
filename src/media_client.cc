@@ -22,10 +22,11 @@ MediaClient::MediaClient(NewSourceCallback stream_callback,
 
 void MediaClient::init_transport(TransportType /*transport_type*/,
                                  const std::string &remote_address,
-                                 unsigned int remote_port)
+                                 unsigned int remote_port,
+                                 bool cc_status)
 {
     media_transport = std::make_shared<QuicRMediaTransport>(
-        remote_address, remote_port, log);
+        remote_address, remote_port, cc_status,log);
 
     work_thread = std::thread(start_work_thread, this);
 }

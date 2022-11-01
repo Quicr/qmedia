@@ -10,6 +10,7 @@ extern "C"
                                  const char *remote_address,
                                  std::uint16_t remote_port,
                                  std::uint64_t client_id,
+                                 bool cc_status,
                                  void **media_client)
     {
         if (!media_client || !remote_address)
@@ -36,7 +37,7 @@ extern "C"
         auto client = std::make_unique<MediaClient>(wrapped_stream_callback,
                                                     client_id,logger);
         client->init_transport(
-            TransportType::QUIC, std::string(remote_address), remote_port);
+            TransportType::QUIC, std::string(remote_address), remote_port, cc_status);
         *media_client = client.release();
     }
 

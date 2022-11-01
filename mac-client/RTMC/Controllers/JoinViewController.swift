@@ -42,7 +42,7 @@ class JoinViewController: NSViewController {
     @IBOutlet weak var videoSourcePullDown: NSPopUpButton!
     @IBOutlet weak var loopbackModePullDown: NSPopUpButton!
     @IBOutlet weak var mediaDirectionPullDown: NSPopUpButton!
-    @IBOutlet weak var loopbackCheckbox: NSButton!
+    @IBOutlet weak var congestionControlCheckbox: NSButton!
     @IBOutlet weak var joinButton: NSButton!
     
     private func mediaDirectionFromString(dir: String) -> Constants.NEO_MEDIA.MediaDirection {
@@ -74,7 +74,7 @@ class JoinViewController: NSViewController {
             if let text = subcribeNameTextField?.stringValue, !text.isEmpty {
               subscribeNameString = subcribeNameTextField.stringValue;
             }
-            let loopbackStateBoolean = Bool(loopbackCheckbox.state.rawValue)
+            let congestionControlStateBoolean = Bool(congestionControlCheckbox.state.rawValue)
             let conferenceIdUnsignedInt = UInt64(1234)
             
             let initParams: [String:Any] =
@@ -82,7 +82,7 @@ class JoinViewController: NSViewController {
                 "sfu": sfuAddrString,
                 "confId": conferenceIdUnsignedInt,
                 "echo": false,
-                "loopback": loopbackStateBoolean,
+                "ccStatus": congestionControlStateBoolean,
                 "loopbackMode": selectedLoopbackMode!,
                 "publishName": publishNameString,
                 "subscribeName": subscribeNameString,
@@ -99,16 +99,7 @@ class JoinViewController: NSViewController {
         }
     }
     
-    @IBAction func didToggleLoopbackCheckbox(_ sender: Any) {
-        guard let checkbox = sender as? NSButton else {return}
-        let isChecked = Bool(checkbox.state.rawValue)
-        if !isChecked {
-            loopbackModePullDown.isHidden = true
-            loopbackModePullDown.isEnabled = false
-        } else {
-            loopbackModePullDown.isHidden = false
-            loopbackModePullDown.isEnabled = true
-        }
+    @IBAction func didToggleCongestionControlCheckbox(_ sender: Any) {
     }
     
     @IBAction func didSelectLoopbackMode(_ sender: Any) {

@@ -92,7 +92,7 @@ class CallViewController: NSViewController {
                 let sfuAddr: String = initParams["sfu"] as! String
                 let confId: UInt64 = initParams["confId"] as! UInt64
                 let echo: Bool = initParams["echo"] as! Bool
-                let loopback: Bool = initParams["loopback"] as! Bool
+                let ccStatus: Bool = initParams["ccStatus"] as! Bool
                 let loopbackMode: Int = initParams["loopbackMode"] as! Int
                 let mediaDirection: Constants.NEO_MEDIA.MediaDirection = initParams["mediaDir"] as! Constants.NEO_MEDIA.MediaDirection
                 let publishName: String = initParams["publishName"] as! String
@@ -104,7 +104,7 @@ class CallViewController: NSViewController {
                 var sub_audio_stream_id: uint64 = 0
                 var sub_video_stream_id: uint64 = 0
             
-                MediaClient_Create(externLogCallback, sourceCallback, sfuAddr, Constants.NEO_MEDIA.port, Constants.NEO_MEDIA.clientId, &media_client);
+                MediaClient_Create(externLogCallback, sourceCallback, sfuAddr, Constants.NEO_MEDIA.port, Constants.NEO_MEDIA.clientId, ccStatus, &media_client);
                
                 var pubname_int = Int(publishName) ?? 0
                 var subname_int = Int(subscribeName) ?? 0

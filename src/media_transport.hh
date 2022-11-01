@@ -59,6 +59,7 @@ struct QuicRMediaTransport : public MediaTransport
 {
     explicit QuicRMediaTransport(const std::string &server_ip,
                             const uint16_t port,
+                            bool cc_status,
                             LoggerPointer logger_in);
     ~QuicRMediaTransport() = default;
 

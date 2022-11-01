@@ -49,6 +49,7 @@ extern "C"
                                         const char *remote_address,
                                         uint16_t remote_port,
                                         uint64_t client_id,
+                                        bool cc_status,
                                         void **media_client);
 
    EXPORT uint64_t CALL
