@@ -71,6 +71,8 @@ QuicRMediaTransport::QuicRMediaTransport(const std::string &server_ip,
     }
     logger->info << "[MediaTransport]: Transport Created" << std::flush;
     delegate.set_logger(logger);
+
+    qr_client.set_congestion_control_status(false);
 }
 
 void QuicRMediaTransport::register_stream(uint64_t id,
