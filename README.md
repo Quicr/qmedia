@@ -48,6 +48,17 @@ Running Mac Client
 ------------------
 The source code for Mac client is under mac-client/
 
+
+Todo: This fails, so work in progress
+```
+mkdir xbuild
+cd xbuild
+cmake .. -G Xcode -DCMAKE_TOOLCHAIN_FILE=../ios.toolchain.cmake -DPLATFORM=OS64 -DOPENSSL_ROOT_DIR="/opt/homebrew/opt/openssl@3"
+```
+
+
+Todo: The above script should be able to correctly copy the library etc.. Work in progress.. 
+
 mac-client can be run with
 ```
  1. Copy libneo_media_client.dylib into mac-client/Neo directory

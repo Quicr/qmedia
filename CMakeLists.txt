@@ -33,6 +33,39 @@ option(BUILD_TESTS  "build tests" ON)
 option(BUILD_SEND_VIDEO_FRAME "build sendVideoFrame cmd" ON)
 option(CLANG_TIDY "Perform linting with clang-tidy" OFF)
 
+
+
+if(Apple)
+    find_library(APPKIT_LIBRARY AppKit)
+    if (NOT APPKIT_LIBRARY)
+        message(STATUS "AppKit.framework NOT found!")
+    else()
+        message(STATUS "AppKit.framework found! ${APPKIT_LIBRARY}")
+    endif()
+
+    find_library(FOUNDATION_LIBRARY Foundation)
+    if (NOT FOUNDATION_LIBRARY)
+        message(STATUS "Foundation.framework NOT found!")
+    else()
+        message(STATUS "Foundation.framework found! ${FOUNDATION_LIBRARY}")
+    endif()
+
+    find_library(UIKIT_LIBRARY UIKit)
+    if (NOT UIKIT_LIBRARY)
+        message(STATUS "UIKit.framework NOT found!")
+    else()
+        message(STATUS "UIKit.framework found! ${UIKIT_LIBRARY}")
+    endif()
+
+    # Hook up XCTest for the supported plaforms (all but WatchOS)
+    if(NOT PLATFORM MATCHES ".*WATCHOS.*")
+        # Use the standard find_package, broken between 3.14.0 and 3.14.4 at least for XCtest...
+        find_package(XCTest)
+        # Fallback: Try to find XCtest as host package via toochain macro (should always work)
+        # find_host_package(XCTest REQUIRED)
+    endif()
+endif(Apple)
+
 # Build PIC dependencies when created extern shared library.
 if (BUILD_EXTERN)
     set(CMAKE_POSITION_INDEPENDENT_CODE ON)
