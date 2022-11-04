@@ -56,6 +56,11 @@ class CallViewController: NSViewController {
         }
     }
 
+    override func viewWillDisappear() {
+        super.viewWillDisappear()
+        NotificationCenter.default.removeObserver(self)
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -250,7 +255,10 @@ class CallViewController: NSViewController {
     
     @IBAction func endButtonClicked(_ sender: Any) {
         // remove all the media streams
+         NotificationCenter.default.removeObserver(self)
+         renderManager.stopRenderingAudio();
          captureManager.stopMediaStreams()
+         renderManager.stopMediaStreams()
          exit(0)
     }
 }

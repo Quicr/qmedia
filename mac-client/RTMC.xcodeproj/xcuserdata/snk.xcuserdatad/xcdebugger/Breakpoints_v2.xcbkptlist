@@ -8,7 +8,7 @@
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
             uuid = "2AB64300-EAF1-421C-A399-5C95D5420BE2"
-            shouldBeEnabled = "Yes"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../build/_deps/quicrq-src/lib/object_consumer.c"
@@ -30,8 +30,8 @@
             filePath = "RTMC/Controllers/CallViewController.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "107"
-            endingLineNumber = "107"
+            startingLineNumber = "112"
+            endingLineNumber = "112"
             landmarkName = "viewDidLoad()"
             landmarkType = "7">
          </BreakpointContent>
@@ -50,6 +50,54 @@
             endingLineNumber = "78"
             landmarkName = "didTapJoinButton(_:)"
             landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "00073D80-06D6-4421-B736-5AE1DD13E990"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../build/_deps/quicr-src/src/quicr_quic_transport.cpp"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "497"
+            endingLineNumber = "497"
+            landmarkName = "QuicRQTransport::unsubscribe(name)"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  uuid = "00073D80-06D6-4421-B736-5AE1DD13E990 - 3f311723c66ce5c9"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "quicr::internal::QuicRQTransport::unsubscribe(std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt; &gt; const&amp;)"
+                  moduleName = "libneo_media_client.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/snk/work/m10x/qmedia-copy/build/_deps/quicr-src/src/quicr_quic_transport.cpp"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "497"
+                  endingLineNumber = "497"
+                  offsetFromSymbolStart = "304">
+               </Location>
+               <Location
+                  uuid = "00073D80-06D6-4421-B736-5AE1DD13E990 - 3f311723c66ce5a6"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "quicr::internal::QuicRQTransport::unsubscribe(std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt; &gt; const&amp;)"
+                  moduleName = "libneo_media_client.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/snk/work/m10x/qmedia-copy/build/_deps/quicr-src/src/quicr_quic_transport.cpp"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "498"
+                  endingLineNumber = "498"
+                  offsetFromSymbolStart = "304">
+               </Location>
+            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

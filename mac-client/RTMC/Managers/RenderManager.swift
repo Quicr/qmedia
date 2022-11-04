@@ -13,6 +13,7 @@ class RenderManager: NSObject {
     // Audio Rendering Properties.
     private var synchronizer: AVSampleBufferRenderSynchronizer = AVSampleBufferRenderSynchronizer()
     private var audioRenderQueue: DispatchQueue?
+    private var audioRenderer = AVSampleBufferAudioRenderer()
     var copiedAudioFormatDesc: CMFormatDescription?
 
     // MARK: - Lifecycle ♻️
@@ -36,11 +37,15 @@ class RenderManager: NSObject {
         self.copiedAudioFormatDesc = desc
     }
     
+    func stopRenderingAudio() {
+        self.audioRenderer.stopRequestingMediaData();
+    }
+    
     // MARK: - Audio rendering. 🎤
     func renderAudio(with sourceParams: [String:Any]) {
         
         // Init renderers.
-        let audioRenderer = AVSampleBufferAudioRenderer()
+        //let audioRenderer = AVSampleBufferAudioRenderer()
         synchronizer.addRenderer(audioRenderer)
         
         audioRenderQueue = DispatchQueue(label: "AudioRenderQueue")
@@ -50,8 +55,10 @@ class RenderManager: NSObject {
         let sourceId: UInt64 = sourceParams["sourceId"] as! UInt64
         let max_len: UInt16 = UInt16(4096) // ~10.67ms
 
+        //audioRenderer.stopRequestingMediaData()
+        
         audioRenderer.requestMediaDataWhenReady(on: self.audioRenderQueue!) {
-            while audioRenderer.isReadyForMoreMediaData {
+            while self.audioRenderer.isReadyForMoreMediaData {
                 
                 if let audioFormatDesc = self.copiedAudioFormatDesc, let media_client = self.media_client {
                     
@@ -113,7 +120,7 @@ class RenderManager: NSObject {
                     }
 
                     // Send the sample buffer to the audio queue for rendering.
-                    audioRenderer.enqueue(sampleBuffer!)
+                    self.audioRenderer.enqueue(sampleBuffer!)
                     
                     // Free the audio packet.
                     let _ = Timer.scheduledTimer(withTimeInterval: 2.5, repeats: false) { (timer) in

@@ -36,6 +36,10 @@ public:
     {
     }
 
+    ~JitterCalc() {
+        jitter_values.clear();
+    }
+
     void updateJitterValues(MetaQueue &mq, unsigned int ms_per_packet);
     unsigned int getJitterMs();
     unsigned int standard_deviation(unsigned int num_std);

@@ -101,6 +101,10 @@ bool Jitter::push(PacketPointer raw_packet)
 bool Jitter::push(PacketPointer packet,
                   std::chrono::steady_clock::time_point now)
 {
+    if(shutdown) {
+        return false;
+    }
+
     bool new_stream = false;
     uint64_t sourceID = packet->sourceID;
     uint64_t clientID = packet->clientID;

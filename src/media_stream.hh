@@ -48,6 +48,8 @@ public:
                              unsigned int max_len,
                              void** to_free) = 0;
 
+    virtual void remove_stream();
+
     void set_transport(std::shared_ptr<MediaTransport> transport)
     {
         media_transport = transport;
@@ -58,11 +60,9 @@ public:
                       uint64_t object_id,
                       std::vector<uint8_t> &&bytes);
 
-    void remove_stream();
-
 protected:
     std::atomic<bool> mutedAudioEmptyFrames = false;
-
+    bool shutdown = false;
     uint64_t domain = 0;
     uint64_t conference_id = 0;
     uint64_t client_id = 0;
@@ -96,6 +96,8 @@ struct AudioStream : public MediaStream
                              unsigned char **buffer,
                              unsigned int max_len,
                              void** to_free) override;
+
+    virtual void remove_stream() override;
 
 private:
     std::shared_ptr<AudioEncoder> setupAudioEncoder();

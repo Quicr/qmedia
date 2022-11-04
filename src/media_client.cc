@@ -148,6 +148,14 @@ void MediaClient::do_work()
         std::istringstream iss(message.name);
         iss >> media_stream_id;
 
+        if (message.data.size() > 0)
+        {
+            log->debug << "[MediaClient::do_work]: got message for "
+                       << media_stream_id << " data:" << message.data.size()
+                       << std::flush;
+        }
+
+
         //  Note: since a subscribe should preceed before
         // data arrival, we should find an entry when
         // there is data for a given stream
@@ -158,18 +166,14 @@ void MediaClient::do_work()
             continue;
         }
 
-        if (message.data.size() > 0)
-        {
-            log->debug << "[MediaClient::do_work]: got message for "
-                      << media_stream_id << " data:" << message.data.size()
-                      << std::flush;
-        }
 
         // hand the data to appropriate media stream
         active_streams[media_stream_id]->handle_media(new_stream_callback,
                                                       message.group_id,
                                                       message.object_id,
                                                       std::move(message.data));
+
+
 
     }
 }
@@ -180,7 +184,6 @@ int MediaClient::get_audio(MediaStreamId streamId,
                            unsigned int max_len,
                            void  **to_free)
 {
-    uint32_t recv_length = 0;
     // happens on client thread
     if (!active_streams.count(streamId))
     {
@@ -194,6 +197,7 @@ int MediaClient::get_audio(MediaStreamId streamId,
         active_streams[streamId]);
     MediaConfig config{};
     return audio_stream->get_media(timestamp, config, buffer, max_len, to_free);
+
 }
 
 std::uint32_t MediaClient::get_video(MediaStreamId streamId,
@@ -204,6 +208,7 @@ std::uint32_t MediaClient::get_video(MediaStreamId streamId,
                                      unsigned char **buffer,
                                      void **to_free)
 {
+
     uint32_t recv_length = 0;
     // happens on client thread
     if (!active_streams.count(streamId))
@@ -220,7 +225,6 @@ std::uint32_t MediaClient::get_video(MediaStreamId streamId,
     width = config.video_max_width;
     height = config.video_max_height;
     format = (uint32_t) config.video_decode_pixel_format;
-
     return recv_length;
 }
 
@@ -234,6 +238,8 @@ void MediaClient::remove_media_stream(MediaStreamId media_stream_id)
     }
 
     active_streams[media_stream_id]->remove_stream();
+    active_streams.erase(media_stream_id);
+
 }
 
 void MediaClient::release_media_buffer(void *buffer)

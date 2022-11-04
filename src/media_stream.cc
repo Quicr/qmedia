@@ -13,6 +13,10 @@ void MediaStream::handle_media(MediaClient::NewSourceCallback  stream_callback,
                                uint64_t /*object_id*/,
                                std::vector<uint8_t> &&data)
 {
+    if (shutdown) {
+        return;
+    }
+
     if (data.empty())
     {
         logger->info << "[MediaStream::handle_media]: empty data " << std::flush;
@@ -65,6 +69,7 @@ void MediaStream::handle_media(MediaClient::NewSourceCallback  stream_callback,
 
 void MediaStream::remove_stream()
 {
+    shutdown = true;
     if(media_transport) {
         media_transport->unregister_stream(id(), media_direction);
     }
@@ -143,6 +148,14 @@ MediaStreamId AudioStream::id()
     media_stream_id = hasher(name);
     logger->info << "Audio MediaStream ID:" << media_stream_id << std::flush;
     return media_stream_id;
+}
+
+void AudioStream::remove_stream()
+{
+    logger->info << "[AudioStream::remove_stream] MediaStream ID:" << media_stream_id << std::flush;
+    MediaStream::remove_stream();
+
+
 }
 
 void AudioStream::handle_media(MediaConfig::CodecType codec_type,
