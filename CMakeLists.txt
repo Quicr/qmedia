@@ -74,7 +74,7 @@ endif(BUILD_EXTERN)
 add_subdirectory(dependencies)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-set(CMAKE_OSX_ARCHITECTURES "arm64")
+#set(CMAKE_OSX_ARCHITECTURES "arm64")
 
 if(CLANG_TIDY)
     find_program(CLANG_TIDY_EXE NAMES "clang-tidy")
