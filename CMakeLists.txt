@@ -1,32 +1,32 @@
 
 cmake_minimum_required(VERSION 3.13)
 
-set(CMAKE_TOOLCHAIN_FILE
-        ${CMAKE_CURRENT_SOURCE_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake
-        CACHE STRING "Vcpkg toolchain file")
-if(NOT EXISTS ${CMAKE_TOOLCHAIN_FILE})
-    message(WARNING
-            "Missing vcpkg toolchain! Do you forget to initialize the vcpkg "
-            "submodule?")
-endif(NOT EXISTS ${CMAKE_TOOLCHAIN_FILE})
+#set(CMAKE_TOOLCHAIN_FILE
+#        ${CMAKE_CURRENT_SOURCE_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake
+#        CACHE STRING "Vcpkg toolchain file")
+#if(NOT EXISTS ${CMAKE_TOOLCHAIN_FILE})
+#    message(WARNING
+#            "Missing vcpkg toolchain! Do you forget to initialize the vcpkg "
+#            "submodule?")
+#endif(NOT EXISTS ${CMAKE_TOOLCHAIN_FILE})
 
 project(qmedia VERSION 0.1 LANGUAGES C CXX)
 
 # submodules
-find_package(Git QUIET)
-if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
+#find_package(Git QUIET)
+#if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
 # Update submodules as needed
-    option(GIT_SUBMODULE "Check submodules during build" ON)
-    if(GIT_SUBMODULE)
-        message(STATUS "Submodule update")
-        execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive
-                        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-                        RESULT_VARIABLE GIT_SUBMOD_RESULT)
-        if(NOT GIT_SUBMOD_RESULT EQUAL "0")
-            message(FATAL_ERROR "git submodule update --init --recursive failed with ${GIT_SUBMOD_RESULT}, please checkout submodules")
-        endif()
-    endif()
-endif()
+#    option(GIT_SUBMODULE "Check submodules during build" ON)
+#    if(GIT_SUBMODULE)
+#        message(STATUS "Submodule update")
+#        execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive
+#                        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+#                        RESULT_VARIABLE GIT_SUBMOD_RESULT)
+#        if(NOT GIT_SUBMOD_RESULT EQUAL "0")
+#            message(FATAL_ERROR "git submodule update --init --recursive failed with ${GIT_SUBMOD_RESULT}, please checkout submodules")
+#        endif()
+#    endif()
+#endif()
 
 option(BUILD_EXTERN "build external library" ON)
 option(BUILD_TESTS  "build tests" ON)
@@ -92,25 +92,26 @@ endif()
 set(LIBRARIES media_api gsl sframe)
 
 # samplerate
-find_library(SAMPLE_RATE samplerate REQUIRED)
-list(APPEND LIBRARIES ${SAMPLE_RATE})
+#find_library(SAMPLE_RATE samplerate REQUIRED)
+#list(APPEND LIBRARIES ${SAMPLE_RATE})
 
 # curl
-find_package(CURL REQUIRED)
-list(APPEND LIBRARIES ${CURL_LIBRARIES})
+#find_package(CURL REQUIRED)
+#list(APPEND LIBRARIES ${CURL_LIBRARIES})
 
 # opus
-if (APPLE)
-    find_package(PkgConfig REQUIRED)
-    pkg_check_modules(opus REQUIRED IMPORTED_TARGET opus)
-    list(APPEND LIBRARIES PkgConfig::opus)
-else(APPLE)
-    find_package(Opus REQUIRED)
-    list(APPEND LIBRARIES Opus::opus)
-endif(APPLE)
+#if (APPLE)
+#    find_package(PkgConfig REQUIRED)
+#    pkg_check_modules(opus REQUIRED IMPORTED_TARGET opus)
+#    list(APPEND LIBRARIES PkgConfig::opus)
+#else(APPLE)
+#    find_package(Opus REQUIRED)
+#    list(APPEND LIBRARIES Opus::opus)
+#endif(APPLE)
 
-add_subdirectory( proto )
-find_package(Opus REQUIRED)
+#   add_subdirectory( proto )
+
+#find_package(Opus REQUIRED)
 
 # Windows sockets.
 if (WIN32)

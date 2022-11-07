@@ -53,7 +53,7 @@ Todo: This fails, so work in progress
 ```
 mkdir xbuild
 cd xbuild
-cmake .. -G Xcode -DCMAKE_TOOLCHAIN_FILE=../cmake/ios.toolchain.cmake -DPLATFORM=MAC_ARM64 -DOPENSSL_ROOT_DIR="/opt/homebrew/opt/openssl@3" -DPICOQUIC_FETCH_PTLS=ON -DWITH_DTRACE=false
+cmake .. -G Xcode -DCMAKE_TOOLCHAIN_FILE=../cmake/ios.toolchain.cmake -DPLATFORM=MAC_ARM64 -DPICOQUIC_FETCH_PTLS=ON -DWITH_DTRACE=false
 ```
 
 
