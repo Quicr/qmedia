@@ -122,8 +122,6 @@ void QuicRMediaTransport::send_data(uint64_t id, quicr::bytes &&data,
                                     uint64_t group_id, uint64_t object_id)
 {
     auto qname = quicr::QuicrName{std::to_string(id), 0};
-    int* a = nullptr;
-    *a++;
     qr_client.publish_named_data(qname.name, std::move(data), group_id, object_id, 0, 0);
 }
 
