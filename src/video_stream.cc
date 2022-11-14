@@ -123,9 +123,10 @@ void VideoStream::handle_media(MediaConfig::CodecType codec_type,
                                      << group_id << std::flush;
                     }
                 }
-
+                uint8_t priority = (encoded->is_intra_frame == true) ? 0x81 : 0x82;
                 media_transport->send_data(id(),
                                            std::move(encoded->encoded_data),
+                                           priority,
                                            group_id,
                                            object_id);
                 object_id += 1;

@@ -250,7 +250,7 @@ void AudioStream::audio_encoder_callback(std::vector<uint8_t> &&bytes, uint64_t 
                  << ", timestamp " << packet->sourceRecordTime
                  << std::flush;
 
-    media_transport->send_data(id(), std::move(packet->encoded_data), group_id, object_id);
+    media_transport->send_data(id(), std::move(packet->encoded_data), 0x80, group_id, object_id);
     group_id += 1;
 }
 

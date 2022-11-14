@@ -25,16 +25,17 @@ Metrics::Metrics(CURL* handle_in)
     }
 
     handle = handle_in;
-    metrics_thread = std::thread(&Metrics::push_loop, this);
-    metrics_thread.detach();
+    //metrics_thread = std::thread(&Metrics::push_loop, this);
+    //metrics_thread.detach();
 }
 
 Metrics::~Metrics()
 {
     shutdown = true;
-    if (metrics_thread.joinable()) {
-        metrics_thread.join();
-    }
+
+    std::cerr << "Submitting Metrics before Closing Metrics" << std::endl;
+    // push all the accumulated metrics
+    emitMetrics();
 
     // TODO: make it part of RAII
     curl_global_cleanup();
@@ -65,7 +66,7 @@ void Metrics::sendMetrics(const std::vector<std::string>& collected_metrics)
         payload += statement;
     }
 
-    std::cerr << "[SendMetrics]: Payload: " << payload << std::endl;
+    std::cerr << "[SendMetrics]: Payload Size: " << payload.size() << std::endl;
 
 
     curl_easy_setopt(
@@ -76,18 +77,18 @@ void Metrics::sendMetrics(const std::vector<std::string>& collected_metrics)
     res = curl_easy_perform(handle);
 
     if (res != CURLE_OK) {
-        std::clog << "Unable to post metrics:"
+        std::clog << "[SendMetrics]: Unable to post metrics:"
                   << curl_easy_strerror(res) << std::endl;
         return;
     }
 
     curl_easy_getinfo(handle, CURLINFO_RESPONSE_CODE, &response_code);
 
-    std::cerr << "Metrics write result: " << response_code << std::endl;
+    std::cerr << "[SendMetrics]: Metrics write result: " << response_code << std::endl;
 
     if (response_code < 200 || response_code >= 300)
     {
-        std::cerr << "Http error posting to influx: " << response_code
+        std::cerr << "[SendMetrics]: Http error posting to influx: " << response_code
                   << std::endl;
         return;
     }
@@ -97,7 +98,6 @@ void Metrics::sendMetrics(const std::vector<std::string>& collected_metrics)
 void Metrics::emitMetrics()
 {
     auto collected_metrics = std::vector<std::string>{};
-
     // Lock the mutex while collecting metrics data
     std::unique_lock<std::mutex> lock(metrics_mutex);
 
@@ -121,37 +121,6 @@ void Metrics::emitMetrics()
 
 void Metrics::push_loop()
 {
-    constexpr auto period = 1000;
-    std::chrono::time_point<std::chrono::steady_clock> next_time;
-
-    // Lock the mutex before starting work
-    std::unique_lock<std::mutex> lock(metrics_mutex);
-
-    // Initialize then metrics emitter time
-    next_time = std::chrono::steady_clock::now() + std::chrono::milliseconds(period);
-
-    while (!shutdown)
-    {
-        // Wait until alerted
-        cv.wait_until(lock, next_time, [&]() { return shutdown; });
-
-        // Were we told to terminate?
-        if (shutdown) {
-            std::clog << "Metrics is shutdown " << std::flush;
-            break;
-        }
-
-        // unlock the mutex
-        lock.unlock();
-
-        emitMetrics();
-
-        // Re-lock the mutex
-        lock.lock();
-
-        next_time = std::chrono::steady_clock::now() +
-                    std::chrono::milliseconds(period);
-    }
 }
 
 ///

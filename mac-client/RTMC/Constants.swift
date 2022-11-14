@@ -13,7 +13,7 @@ struct Constants {
     struct NEO_MEDIA {
 
         // NeoMediaInstance Init parameters.
-        static let sfu = "relay.us-east-2.quicr.ctgpoc.com" //127.0.0.1" //"18.191.247.162" //"13.56.164.43"//"127.0.0.1" // "54.201.7.152" // "18.236.63.86"
+        static let sfu = "relay.us-west-2.quicr.ctgpoc.com" //127.0.0.1" //"18.191.247.162" //"13.56.164.43"//"127.0.0.1" // "54.201.7.152" // "18.236.63.86"
         static let port = UInt16(15004)
         static let domainId =  UInt64(1000)
         static let confernceId =  UInt64(2000)
@@ -31,8 +31,8 @@ struct Constants {
         
         // Video settings.
         struct VIDEO {
-            static let max_width  = UInt32(1280)
-            static let max_height = UInt32(720)
+            static let max_width  = UInt32(1920)
+            static let max_height = UInt32(1080)
             static let max_frame_rate = UInt16(30)
             static let max_bitrate = UInt32(1_500_000)
             static let enc_pixel_format = UInt16(0) // NV12 420v BiPlanar

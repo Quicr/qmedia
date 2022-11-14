@@ -46,12 +46,11 @@ void Delegate::on_object_published(const std::string &name,
     }
 }
 
-void Delegate::log(quicr::LogLevel /*level*/, const std::string &message)
+void Delegate::log(quicr::LogLevel level, const std::string &message)
 {
-    // todo: add support for inserting logger
-    if (logger)
+    if (logger && level >= quicr::LogLevel::error)
     {
-        logger->info << message << std::flush;
+        //logger->info << message << std::flush;
     }
 }
 
@@ -74,6 +73,7 @@ QuicRMediaTransport::QuicRMediaTransport(const std::string &server_ip,
     logger->info << "[MediaTransport]: Transport Created" << std::flush;
     delegate.set_logger(logger);
     logger->info << "[MediaTransport]: Transport CC Status "  << cc_status << std::flush;
+    enable_media_priority = cc_status;
     //qr_client.set_congestion_control_status(cc_status);
 }
 
@@ -119,10 +119,12 @@ void QuicRMediaTransport::unregister_stream(uint64_t id, MediaConfig::MediaDirec
 }
 
 void QuicRMediaTransport::send_data(uint64_t id, quicr::bytes &&data,
-                                    uint64_t group_id, uint64_t object_id)
+                                    uint8_t priority, uint64_t group_id,
+                                    uint64_t object_id)
 {
     auto qname = quicr::QuicrName{std::to_string(id), 0};
-    qr_client.publish_named_data(qname.name, std::move(data), group_id, object_id, 0, 0);
+    auto data_priority  = (enable_media_priority == true) ? priority : 0;
+    qr_client.publish_named_data(qname.name, std::move(data), group_id, object_id, data_priority, 0);
 }
 
 void QuicRMediaTransport::wait_for_messages()
