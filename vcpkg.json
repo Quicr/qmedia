@@ -7,10 +7,6 @@
     "openssl",
     "doctest",
     "libsamplerate",
-    "curl",
-    {
-      "name": "portaudio",
-      "platform": "!uwp"
-    }
+    "curl"
   ]
 }

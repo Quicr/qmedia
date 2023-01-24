@@ -56,7 +56,7 @@ endif()
 ### Dependencies
 ###
 
-set(LIBRARIES media_api gsl sframe)
+set(LIBRARIES media_api )
 
 # samplerate
 find_library(SAMPLE_RATE samplerate REQUIRED)
@@ -75,9 +75,9 @@ else(APPLE)
     find_package(Opus REQUIRED)
     list(APPEND LIBRARIES Opus::opus)
 endif(APPLE)
+find_package(Opus REQUIRED) 
 
 add_subdirectory( proto )
-find_package(Opus REQUIRED)
 
 # Windows sockets.
 if (WIN32)
